@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ar" dir="rtl">
       <head>
-        {/* ✅ Meta Pixel Code */}
+        {/* Meta Pixel Code */}
         <Script id="facebook-pixel" strategy="afterInteractive">
           {`
             !function(f,b,e,v,n,t,s)
@@ -46,9 +46,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             src="https://www.facebook.com/tr?id=1311578010618135&ev=PageView&noscript=1"
           />
         </noscript>
-        {/* ✅ End Meta Pixel Code */}
+        {/* End Meta Pixel Code */}
 
-        {/* ✅ Snap Pixel Code */}
+        {/* Snap Pixel Code */}
         <Script id="snap-pixel" strategy="afterInteractive">
           {`
             (function(e,t,n){
@@ -69,7 +69,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             snaptr('track', 'PAGE_VIEW');
           `}
         </Script>
-        {/* ✅ End Snap Pixel Code */}
+        {/* End Snap Pixel Code */}
       </head>
       <body className="antialiased bg-[#fff6f2]">
         <Suspense fallback={null}>
