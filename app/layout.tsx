@@ -1,17 +1,15 @@
-import type React from "react"
+import type { ReactNode } from "react"
 import { Suspense } from "react"
 import type { Metadata } from "next"
-import { GeistSans } from "geist/font/sans"
-import { GeistMono } from "geist/font/mono"
-import "./globals.css"
 import Script from "next/script"
+
+import "./globals.css"
 import PixelTracker from "./pixel-tracker"
 
 export const metadata: Metadata = {
-  title: "Ummah Muslimah Academy | أكاديمية أمة مسلمة",
+  title: "أكاديمية أمة مسلمة | Ummah Muslimah Academy",
   description:
-    "Learn Quran and Tajweed with Expert Teachers | تعلم القرآن والتجويد مع أفضل المعلمين",
-  generator: "v0.dev",
+    "أكاديمية أمة مسلمة لتعليم القرآن والتجويد أونلاين للأطفال والكبار، مع معلمين ومعلمات مجازين وبرامج تربوية مميزة.",
   icons: {
     icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo-PFiwOQmUO2XqQEdFh8evsswZet7bO5.png",
     shortcut:
@@ -21,22 +19,10 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ar" dir="rtl">
       <head>
-        <style>{`
-html {
-  font-family: ${GeistSans.style.fontFamily};
-  --font-sans: ${GeistSans.variable};
-  --font-mono: ${GeistMono.variable};
-}
-        `}</style>
-
         {/* ✅ Meta Pixel Code */}
         <Script id="facebook-pixel" strategy="afterInteractive">
           {`
@@ -48,7 +34,7 @@ html {
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '1311578010618135'); 
+            fbq('init', '1311578010618135');
             fbq('track', 'PageView');
           `}
         </Script>
@@ -85,7 +71,7 @@ html {
         </Script>
         {/* ✅ End Snap Pixel Code */}
       </head>
-      <body>
+      <body className="antialiased bg-[#fff6f2]">
         <Suspense fallback={null}>
           <PixelTracker />
         </Suspense>
