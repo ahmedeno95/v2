@@ -1,9 +1,21 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import {
+  useState,
+  useEffect,
+  useRef,
+  ReactNode,
+} from "react"
+
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+
 import {
   BookOpen,
   Users,
@@ -21,6 +33,8 @@ import {
   PlayCircle,
 } from "lucide-react"
 
+type Language = "ar" | "en"
+
 interface Currency {
   code: string
   symbol: string
@@ -31,8 +45,7 @@ interface LocationData {
   country_code: string
 }
 
-type Language = "ar" | "en"
-
+/* ---------- العملات (أسعار تقريبية) ---------- */
 const currencyRates: Record<string, Currency> = {
   EGP: { code: "EGP", symbol: "ج.م", rate: 48.4475 },
   SAR: { code: "SAR", symbol: "ر.س", rate: 3.7519 },
@@ -41,59 +54,48 @@ const currencyRates: Record<string, Currency> = {
   USD: { code: "USD", symbol: "$", rate: 1 },
 }
 
+/* ---------- النصوص (ترجمة عربية / إنجليزية) ---------- */
 const translations: Record<
   Language,
   {
     academyName: string
     academyNameEn: string
 
-    // nav
     menuAbout: string
+    menuPrograms: string
     menuPricing: string
     menuVideos: string
-    menuServices: string
     menuTestimonials: string
     menuContact: string
     subscribeTop: string
 
-    // hero
     heroAyah: string
     heroTagline: string
     heroSubtitle: string
     heroPrimaryCta: string
     heroSecondaryCta: string
 
-    // why us / about
     whyUsTitle: string
     whyUsSubtitle: string
-    statsTitle: string
-    statsSubtitle: string
     missionTitle: string
     missionText: string
+    statsTitle: string
+    statsSubtitle: string
 
-    // services / programs
-    servicesTitle: string
-    servicesSubtitle: string
+    programsTitle: string
+    programsSubtitle: string
 
-    // special tracks
     tracksTitle: string
     tracksSubtitle: string
-    competitionsTitle: string
-    competitionsText: string
-    superProgramTitle: string
-    superProgramText: string
     qudsTitle: string
     qudsText: string
 
-    // videos
     videosTitle: string
     videosSubtitle: string
 
-    // testimonials
     testimonialsTitle: string
     testimonialsSubtitle: string
 
-    // pricing
     pricingTitle: string
     pricingSubtitle: string
     basicPlan: string
@@ -103,7 +105,6 @@ const translations: Record<
     mostPopular: string
     subscribeNow: string
 
-    // CTA / contact / footer
     ctaTitle: string
     ctaSubtitle: string
     contactTitle: string
@@ -116,9 +117,9 @@ const translations: Record<
     academyNameEn: "Muslim Ummah Academy",
 
     menuAbout: "عن الأكاديمية",
+    menuPrograms: "مواد الأكاديمية",
     menuPricing: "الأسعار",
-    menuVideos: "محتوى الأكاديمية",
-    menuServices: "مواد الأكاديمية",
+    menuVideos: "الفيديوهات",
     menuTestimonials: "آراء العملاء",
     menuContact: "تواصل معنا",
     subscribeTop: "احجز حصتك المجانية",
@@ -126,42 +127,42 @@ const translations: Record<
     heroAyah: "خَيْرُكُم مَن تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ",
     heroTagline: "منصة متخصصة لتعليم القرآن والتجويد أونلاين",
     heroSubtitle:
-      "حصص مباشرة، معلمين ومعلمات مجازين، ومحتوى تفاعلي يناسب الكبار والأطفال في أي مكان في العالم.",
-    heroPrimaryCta: "احجز حصتك المجانية الآن",
+      "حصص مباشرة، معلمات ومعلمون مجازون، ومتابعة حقيقية لكل طالب وطالبة في أجواء مريحة من البيت.",
+    heroPrimaryCta: "احجز حصة مجانية الآن",
     heroSecondaryCta: "شاهد محتوى الأكاديمية",
 
     whyUsTitle: "لماذا أكاديمية أمة مسلمة؟",
-    whyUsSubtitle: "كل ما تحتاجه لرحلة قرآنية ثابتة ومنظمة… في مكان واحد.",
-    statsTitle: "ليست مجرد أرقام",
-    statsSubtitle: "أثر حقيقي في حياة مئات الطلاب والأُسر حول العالم.",
+    whyUsSubtitle:
+      "نقدّم تجربة قرآنية متكاملة: حفظ، تجويد، تربية إيمانية، وارتباط فعلي بكتاب الله وقضايا الأمة.",
     missionTitle: "رسالتنا",
     missionText:
-      "نسعى في أكاديمية أمة مسلمة إلى ربط القلوب بكتاب الله حفظًا وتجويدًا وفهمًا، بأسلوب يجمع بين الأصالة والوسائل التعليمية الحديثة، مع متابعة حقيقية لكل طالب وطالبة.",
+      "نغرس في قلوب أبنائنا حبّ القرآن والاعتزاز بالهوية الإسلامية، من خلال حصص تفاعلية، معلمين ثقات، ومتابعة مستمرة مع أولياء الأمور.",
+    statsTitle: "ليست مجرد أرقام",
+    statsSubtitle:
+      "وراء كل رقم طالب/ـة وأُسرة تغيّر علاقتهم بالقرآن للأفضل ولله الحمد.",
 
-    servicesTitle: "مواد الأكاديمية",
-    servicesSubtitle: "مسارات تعليمية متكاملة تناسب مختلف الأعمار والمستويات.",
+    programsTitle: "مواد الأكاديمية",
+    programsSubtitle:
+      "مسارات مرنة للكبار والأطفال، لغير الناطقين بالعربية، ولمن يرغبون في الإتقان والحفظ طويل المدى.",
 
-    tracksTitle: "برامج ومسارات مميزة",
-    tracksSubtitle: "تجارب تعليمية تضيف الحماس والمتعة إلى حفظ القرآن.",
-    competitionsTitle: "مسابقات أمة",
-    competitionsText:
-      "مسابقات شهرية ورمضانية لتحفيز الطلاب على المراجعة، مع جوائز وشهادات تميّز المتفوّقين وتشجع الباقين.",
-    superProgramTitle: "برنامج سوبر أمة",
-    superProgramText:
-      "برنامج مكثّف لطلاب النخبة، مجموعات صغيرة، متابعة لصيقة، وخطط حفظ تسابق الزمن بإتقان وهدوء.",
+    tracksTitle: "برامج ومسارات مميّزة",
+    tracksSubtitle:
+      "مسابقات، مسار مكثّف، وبرنامج قُدسنا.. لتكون رحلة القرآن حيّة وفاعلة في حياة الطفل.",
     qudsTitle: "برنامج قُدسنا",
     qudsText:
-      "برنامج تعريفي تربوي عن فلسطين والقدس والمسجد الأقصى، يعرّف الأطفال بهوية الأمة وقضاياها العادلة بقصص ونشاطات ممتعة.",
+      "برنامج قيم يحكي للأطفال عن فلسطين والقدس والمسجد الأقصى بقصص وأنشطة تربوية تعزّز الانتماء للقضية.",
 
-    videosTitle: "من قلب الأكاديمية",
+    videosTitle: "من داخل الأكاديمية",
     videosSubtitle:
-      "مقاطع من حصص حقيقية ومواد تعريفية توضّح طريقة الشرح، الانضباط، والتعامل مع الطلاب.",
+      "لقطات من حصص حقيقية توضّح طريقة الشرح، الجو العام، والتعامل التربوي مع الطلاب.",
 
-    testimonialsTitle: "آراء أولياء الأمور والطلاب",
-    testimonialsSubtitle: "قصص نجاح حقيقية من أسر اطمأنّت إلى أن أبناءها في أيدٍ أمينة.",
+    testimonialsTitle: "ماذا يقول أولياء الأمور والطلاب؟",
+    testimonialsSubtitle:
+      "ثقة تُبنى على نتائج ملموسة في التلاوة والسلوك وانضباط الأبناء.",
 
-    pricingTitle: "خطط مرنة تناسبك",
-    pricingSubtitle: "اختر عدد الحصص الأسبوعية بما يناسب وقتك وميزانيتك، بدون التزام معقّد.",
+    pricingTitle: "خطط اشتراك مرنة",
+    pricingSubtitle:
+      "اختر عدد الحصص الأسبوعية بما يناسب وقتك وميزانيتك، مع إمكانية تعديل الخطة لاحقًا.",
     basicPlan: "خطة البداية",
     standardPlan: "الخطة المتقدمة",
     premiumPlan: "خطة النخبة",
@@ -169,11 +170,12 @@ const translations: Record<
     mostPopular: "الأكثر اختيارًا",
     subscribeNow: "اشترك الآن",
 
-    ctaTitle: "جاهز لتكون رحلتك مع القرآن أكثر ثباتًا وتنظيمًا؟",
+    ctaTitle: "جاهز لتبدأ أنت وأبناؤك رحلة ثابتة مع القرآن؟",
     ctaSubtitle:
-      "أرسل لنا رسالة عبر واتساب ودع فريق الأكاديمية يساعدك على اختيار الخطة الأنسب لك ولأطفالك.",
-    contactTitle: "تواصل معنا مباشرة",
-    contactSubtitle: "فريق الدعم جاهز للإجابة عن أسئلتك بالعربية أو الإنجليزية.",
+      "راسلنا على واتساب لفهم احتياجك، واختيار المعلمة/المعلم والخطة الأنسب لأسرتك.",
+    contactTitle: "تواصل مباشر مع فريق الأكاديمية",
+    contactSubtitle:
+      "نسعد بالرد على استفساراتك بالعربية أو الإنجليزية عبر واتساب والسوشيال.",
     footerRights: "جميع الحقوق محفوظة © أكاديمية أمة مسلمة",
   },
 
@@ -182,9 +184,9 @@ const translations: Record<
     academyNameEn: "أكاديمية أمة مسلمة",
 
     menuAbout: "About",
+    menuPrograms: "Programs",
     menuPricing: "Pricing",
-    menuVideos: "Content",
-    menuServices: "Programs",
+    menuVideos: "Videos",
     menuTestimonials: "Testimonials",
     menuContact: "Contact",
     subscribeTop: "Book a free lesson",
@@ -192,44 +194,42 @@ const translations: Record<
     heroAyah: '“The best of you are those who learn the Qur\'an and teach it.”',
     heroTagline: "Qur'an & Tajweed online for the whole family",
     heroSubtitle:
-      "Live one‑to‑one sessions with qualified teachers and engaging, structured curriculums for children and adults.",
+      "Live one‑to‑one and small‑group sessions with trusted teachers, tailored for children and adults around the world.",
     heroPrimaryCta: "Book your free lesson",
     heroSecondaryCta: "Watch academy content",
 
     whyUsTitle: "Why Muslim Ummah Academy?",
-    whyUsSubtitle: "Everything you need for a consistent Qur'an journey – in one place.",
-    statsTitle: "More than just numbers",
-    statsSubtitle: "Real impact in the lives of students and families around the world.",
+    whyUsSubtitle:
+      "We combine Qur’an memorisation, tajweed and Islamic character‑building in a warm, structured learning experience.",
     missionTitle: "Our mission",
     missionText:
-      "We help children and adults connect deeply with the Qur’an through memorisation, tajweed and understanding, in a warm, faith‑centred learning environment.",
+      "To nurture a generation that loves the Qur’an and feels connected to the Ummah through gentle, consistent guidance and inspiring teachers.",
+    statsTitle: "More than just numbers",
+    statsSubtitle:
+      "Each number is a real family whose Qur’an journey has changed, alhamdulillah.",
 
-    servicesTitle: "Academy programs",
-    servicesSubtitle: "Structured learning paths for different ages and levels.",
+    programsTitle: "Academy programs",
+    programsSubtitle:
+      "Flexible tracks for children, adults and non‑Arabic speakers, from basics to long‑term hifdh.",
 
     tracksTitle: "Special tracks & experiences",
-    tracksSubtitle: "Add excitement and motivation to your Qur'an journey.",
-    competitionsTitle: "Ummah competitions",
-    competitionsText:
-      "Monthly and Ramadan competitions that encourage revision, with prizes and certificates for high achievers.",
-    superProgramTitle: "Super Ummah program",
-    superProgramText:
-      "An intensive track for high‑commitment students, with small groups, close follow‑up and ambitious memorisation plans.",
+    tracksSubtitle:
+      "Competitions, an intensive Super Ummah track, and our Quds program to connect hearts with Palestine.",
     qudsTitle: "Our Quds program",
     qudsText:
-      "A values‑based program about Palestine, Al‑Quds and Al‑Aqsa, building a strong connection with the Ummah’s central cause through stories and activities.",
+      "A values‑based program introducing children to Palestine, Al‑Quds and Al‑Aqsa through stories and activities.",
 
     videosTitle: "Inside the academy",
     videosSubtitle:
-      "Short clips from real sessions that show how teachers interact with students.",
+      "Short clips from real sessions so you can see how our teachers interact with students.",
 
     testimonialsTitle: "What parents & students say",
     testimonialsSubtitle:
-      "Genuine feedback from families who trusted us with their Qur’an journey.",
+      "Trust built on consistent follow‑up, gentle teachers and clear progress.",
 
     pricingTitle: "Flexible plans",
     pricingSubtitle:
-      "Choose the number of weekly sessions that best fits your schedule and your budget.",
+      "Choose your weekly sessions and adjust later as your schedule changes.",
     basicPlan: "Starter plan",
     standardPlan: "Focused plan",
     premiumPlan: "Elite plan",
@@ -239,29 +239,30 @@ const translations: Record<
 
     ctaTitle: "Ready to make your Qur'an journey more consistent?",
     ctaSubtitle:
-      "Send us a WhatsApp message and our team will help you choose the best plan for you or your children.",
-    contactTitle: "Contact us directly",
-    contactSubtitle: "Our support team can help in both Arabic and English.",
+      "Message us on WhatsApp and our team will help you design the best plan for you or your children.",
+    contactTitle: "Contact our team",
+    contactSubtitle:
+      "We’re happy to assist in Arabic and English via WhatsApp and social media.",
     footerRights: "All rights reserved © Muslim Ummah Academy",
   },
 }
 
-/* ---------- CountUp component (for stats like Zuwad) ---------- */
+/* ---------- عدّاد للأرقام (مثل زواد) ---------- */
 function CountUp({
-  to = 1000,
+  to,
   duration = 1200,
   prefix = "",
   suffix = "",
   className = "",
 }: {
-  to?: number
+  to: number
   duration?: number
   prefix?: string
   suffix?: string
   className?: string
 }) {
   const [val, setVal] = useState(0)
-  const ref = useRef<HTMLDivElement | null>(null)
+  const ref = useRef<any>(null)
   const startedRef = useRef(false)
 
   useEffect(() => {
@@ -290,60 +291,114 @@ function CountUp({
   }, [to, duration])
 
   const locale =
-    typeof document !== "undefined" && document.documentElement.dir === "rtl" ? "ar-EG" : "en-US"
+    typeof document !== "undefined" && document.documentElement.dir === "rtl"
+      ? "ar-EG"
+      : "en-US"
+
   const formatted = new Intl.NumberFormat(locale).format(val)
 
   return (
-    <div ref={ref} className={className}>
-      <span className="tabular-nums">
-        {prefix}
-        {formatted}
-        {suffix}
-      </span>
-    </div>
+    <span ref={ref} className={className}>
+      {prefix}
+      {formatted}
+      {suffix}
+    </span>
   )
 }
 
-/* ---------- Videos Section (Reels-style مثل زواد) ---------- */
-function VideosSection({ language }: { language: Language }) {
-  const videoIds = ["nAMImHfDMmI", "FbNOMuPZK2I", "lTQiLyOL5kU", "nmQrYjJlBmg", "N1WfVkQsC2c"]
-  const [index, setIndex] = useState(language === "ar" ? 0 : 1)
+/* ---------- كومبوننت بسيط للأنيميشن عند الظهور ---------- */
+function AnimatedSection({
+  id,
+  className = "",
+  children,
+  delay = 0,
+}: {
+  id?: string
+  className?: string
+  children: ReactNode
+  delay?: number
+}) {
+  const ref = useRef<any>(null)
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    setIndex(language === "ar" ? 0 : 1)
-  }, [language])
+    const el = ref.current
+    if (!el) return
 
-  const prev = () => setIndex((i) => (i - 1 + videoIds.length) % videoIds.length)
-  const next = () => setIndex((i) => (i + 1) % videoIds.length)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisible(true)
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.18 }
+    )
 
-  const t = translations[language]
-  const isRTL = language === "ar"
-  const src = `https://www.youtube-nocookie.com/embed/${videoIds[index]}?rel=0&modestbranding=1&playsinline=1`
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   return (
-    <section id="videos" className="py-20 bg-white scroll-mt-24">
+    <section
+      id={id}
+      ref={ref}
+      className={`section-fade ${
+        visible ? "section-fade-visible" : ""
+      } ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </section>
+  )
+}
+
+/* ---------- قسم الفيديوهات (Reels-style) ---------- */
+function VideosSection({ language }: { language: Language }) {
+  const videoIds = ["nAMImHfDMmI", "FbNOMuPZK2I", "lTQiLyOL5kU", "nmQrYjJlBmg"]
+  const [index, setIndex] = useState(0)
+  const isRTL = language === "ar"
+  const t = translations[language]
+
+  const src = `https://www.youtube-nocookie.com/embed/${videoIds[index]}?rel=0&modestbranding=1&playsinline=1`
+
+  const prev = () =>
+    setIndex((i) => (i - 1 + videoIds.length) % videoIds.length)
+  const next = () => setIndex((i) => (i + 1) % videoIds.length)
+
+  return (
+    <AnimatedSection
+      id="videos"
+      className="py-20 bg-[#f9f2f6] scroll-mt-28"
+    >
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto text-center mb-10">
-          <Badge className="mb-3 bg-emerald-100 text-emerald-800 border-emerald-200">
+          <Badge className="mb-3 bg-[#f7d66e]/20 text-[#f7d66e] border-[#f7d66e]/40">
             <PlayCircle className="h-4 w-4 mx-1" />
-            <span>{isRTL ? "لقطات حقيقية" : "Real sessions"}</span>
+            <span>
+              {isRTL ? "لقطات من حصص حقيقية" : "Real session snippets"}
+            </span>
           </Badge>
-          <h2 className="text-4xl md:text-5xl font-bold text-emerald-900 mb-3">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#3c0020] mb-3 tracking-tight">
             {t.videosTitle}
           </h2>
-          <p className="text-lg text-emerald-800/80">{t.videosSubtitle}</p>
+          <p className="text-lg text-[#5b1734]/80">
+            {t.videosSubtitle}
+          </p>
         </div>
 
         <div className="max-w-[360px] sm:max-w-[380px] md:max-w-[420px] mx-auto">
           <div className="relative">
-            <div className="rounded-3xl overflow-hidden shadow-xl border border-emerald-100 bg-black">
+            <div className="rounded-[32px] overflow-hidden soft-shadow bg-black border border-[#f7d66e]/30 hero-float">
               <div className="aspect-[9/16]">
                 <iframe
                   key={videoIds[index]}
                   src={src}
                   title="Ummah Academy video"
-                  loading="lazy"
                   className="w-full h-full"
+                  loading="lazy"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                 />
@@ -353,7 +408,7 @@ function VideosSection({ language }: { language: Language }) {
             <button
               onClick={prev}
               aria-label="Previous video"
-              className={`absolute top-1/2 -translate-y-1/2 rounded-full bg-white/90 hover:bg-white shadow p-3 border border-emerald-100 ${
+              className={`video-nav-btn ${
                 isRTL ? "right-2" : "left-2"
               }`}
             >
@@ -362,7 +417,7 @@ function VideosSection({ language }: { language: Language }) {
             <button
               onClick={next}
               aria-label="Next video"
-              className={`absolute top-1/2 -translate-y-1/2 rounded-full bg-white/90 hover:bg-white shadow p-3 border border-emerald-100 ${
+              className={`video-nav-btn ${
                 isRTL ? "left-2" : "right-2"
               }`}
             >
@@ -375,8 +430,10 @@ function VideosSection({ language }: { language: Language }) {
               <button
                 key={i}
                 onClick={() => setIndex(i)}
-                className={`h-2.5 w-2.5 rounded-full transition-all ${
-                  i === index ? "bg-emerald-700 w-6" : "bg-emerald-200"
+                className={`h-2.5 rounded-full transition-all ${
+                  i === index
+                    ? "bg-[#f7d66e] w-6"
+                    : "bg-[#e3bfd6] w-2.5"
                 }`}
                 aria-label={`Go to video ${i + 1}`}
               />
@@ -384,11 +441,11 @@ function VideosSection({ language }: { language: Language }) {
           </div>
         </div>
       </div>
-    </section>
+    </AnimatedSection>
   )
 }
 
-/* ---------- Testimonials Section (سلايدر + صور فيد مثل زواد) ---------- */
+/* ---------- قسم التقييمات ---------- */
 function TestimonialsSection({
   language,
   whatsappLink,
@@ -397,6 +454,7 @@ function TestimonialsSection({
   whatsappLink: string
 }) {
   const isRTL = language === "ar"
+  const t = translations[language]
 
   const testimonials = [
     {
@@ -432,88 +490,103 @@ function TestimonialsSection({
   ]
 
   const [index, setIndex] = useState(0)
-
-  const prev = () => setIndex((i) => (i - 1 + testimonials.length) % testimonials.length)
-  const next = () => setIndex((i) => (i + 1) % testimonials.length)
-
   const current = testimonials[index]
 
+  const prev = () =>
+    setIndex((i) => (i - 1 + testimonials.length) % testimonials.length)
+  const next = () => setIndex((i) => (i + 1) % testimonials.length)
+
   return (
-    <section id="testimonials" className="py-20 bg-emerald-50/80 scroll-mt-24">
+    <AnimatedSection
+      id="testimonials"
+      className="py-20 bg-[#fdf7f0] scroll-mt-28"
+    >
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto text-center mb-10">
-          <Badge className="mb-3 bg-white text-emerald-800 border-emerald-200">
+          <Badge className="mb-3 bg-[#f7d66e]/20 text-[#f7d66e] border-[#f7d66e]/40">
             <Star className="h-4 w-4 mx-1" />
             <span>{isRTL ? "تجارب حقيقية" : "Real experiences"}</span>
           </Badge>
-          <h2 className="text-4xl md:text-5xl font-bold text-emerald-900 mb-3">
-            {isRTL ? "آراء أولياء الأمور والطلاب" : "What parents & students say"}
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#3c0020] mb-3 tracking-tight">
+            {t.testimonialsTitle}
           </h2>
-          <p className="text-lg text-emerald-800/80">
-            {isRTL
-              ? "ثقة تُبنى على متابعة قريبة ونتائج ملموسة في تلاوة الأبناء."
-              : "Trust built on close follow‑up and visible improvement in recitation."}
+          <p className="text-lg text-[#5b1734]/80">
+            {t.testimonialsSubtitle}
           </p>
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <Card className="relative overflow-hidden border-emerald-100 bg-white/90">
-            <CardContent className="p-8 md:p-10">
-              <div className="flex flex-col md:flex-row gap-8 items-center">
-                {/* صورة من الفيد (مثل زواد) */}
-                <div className="relative w-full md:w-1/2">
-                  <div className="aspect-square rounded-3xl overflow-hidden border border-emerald-100 shadow-md">
-                    <img
-                      src={`/images/feed${index + 1}.webp`}
-                      alt="Testimonial screenshot"
-                      className="w-full h-full object-cover"
+          <Card className="relative overflow-hidden border-[#f1c5e0]/60 bg-white/95 soft-shadow">
+            <CardContent className="p-8 md:p-10 flex flex-col md:flex-row gap-8 items-center">
+              {/* صورة طفل بالمصحف */}
+              <div className="relative w-full md:w-1/2">
+                <div className="overflow-hidden rounded-[28px] border border-[#f1c5e0]/70 soft-shadow">
+                  <img
+                    src="/images/boy-with-quran.webp"
+                    alt="Happy student holding the Qur'an"
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <Badge className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-[#8f1238] text-[#f7d66e] shadow-lg border-none text-xs">
+                  {isRTL ? "من قصص نجاح طلابنا" : "From our success stories"}
+                </Badge>
+              </div>
+
+              {/* نص التقييم */}
+              <div
+                className={`flex-1 ${
+                  isRTL ? "text-right" : "text-left"
+                }`}
+              >
+                <div
+                  className={`flex items-center gap-2 mb-4 ${
+                    isRTL ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className="h-4 w-4 text-[#f7d66e] fill-[#f7d66e]"
                     />
-                  </div>
-                  <Badge className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-emerald-800 text-yellow-300 shadow-lg">
-                    {isRTL ? "من حسابات حقيقية" : "From real accounts"}
-                  </Badge>
+                  ))}
+                  <span className="text-xs text-gray-500">
+                    {isRTL ? "تقييم 5/5" : "Rated 5/5"}
+                  </span>
                 </div>
 
-                {/* نص التقييم */}
-                <div className={`flex-1 ${isRTL ? "text-right" : "text-left"}`}>
-                  <div
-                    className={`flex items-center gap-2 mb-4 ${
-                      isRTL ? "justify-end" : "justify-start"
+                <p className="text-lg md:text-xl text-[#3c0020] leading-relaxed mb-4">
+                  {isRTL ? current.quoteAr : current.quoteEn}
+                </p>
+                <p className="font-semibold text-[#8f1238]">
+                  {isRTL ? current.nameAr : current.nameEn}
+                </p>
+                <p className="text-xs text-gray-500 mb-6">
+                  {isRTL ? current.roleAr : current.roleEn}
+                </p>
+
+                <Button
+                  variant="outline"
+                  className="border-[#f1c5e0] text-[#8f1238] hover:bg-[#fdf0f7]"
+                  onClick={() => window.open(whatsappLink, "_blank")}
+                >
+                  <MessageCircle
+                    className={`h-4 w-4 ${
+                      isRTL ? "ml-2" : "mr-2"
                     }`}
-                  >
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                    <span className="text-sm text-gray-500">
-                      {isRTL ? "تقييم 5/5" : "Rated 5/5"}
-                    </span>
-                  </div>
-                  <p className="text-lg md:text-xl text-gray-800 leading-relaxed mb-4">
-                    {isRTL ? current.quoteAr : current.quoteEn}
-                  </p>
-                  <p className="font-semibold text-emerald-900">
-                    {isRTL ? current.nameAr : current.nameEn}
-                  </p>
-                  <p className="text-sm text-gray-500 mb-6">
-                    {isRTL ? current.roleAr : current.roleEn}
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="border-emerald-200 text-emerald-800 hover:bg-emerald-50"
-                    onClick={() => window.open(whatsappLink, "_blank")}
-                  >
-                    <MessageCircle className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
-                    {isRTL ? "اسأل عن تجربة غيرك" : "Ask about their experience"}
-                  </Button>
-                </div>
+                  />
+                  {isRTL
+                    ? "اسأل عن تجربة غيرك"
+                    : "Ask about their experience"}
+                </Button>
               </div>
             </CardContent>
 
-            {/* الأسهم */}
+            {/* أسهم السلايدر */}
             <button
               onClick={prev}
               aria-label="Previous testimonial"
-              className={`absolute top-1/2 -translate-y-1/2 rounded-full bg-white/90 hover:bg-white shadow p-3 border border-emerald-100 ${
+              className={`slider-arrow ${
                 isRTL ? "right-3" : "left-3"
               }`}
             >
@@ -522,7 +595,7 @@ function TestimonialsSection({
             <button
               onClick={next}
               aria-label="Next testimonial"
-              className={`absolute top-1/2 -translate-y-1/2 rounded-full bg-white/90 hover:bg-white shadow p-3 border border-emerald-100 ${
+              className={`slider-arrow ${
                 isRTL ? "left-3" : "right-3"
               }`}
             >
@@ -535,8 +608,10 @@ function TestimonialsSection({
               <button
                 key={i}
                 onClick={() => setIndex(i)}
-                className={`h-2.5 w-2.5 rounded-full transition-all ${
-                  i === index ? "bg-emerald-800 w-6" : "bg-emerald-200"
+                className={`h-2.5 rounded-full transition-all ${
+                  i === index
+                    ? "bg-[#8f1238] w-6"
+                    : "bg-[#e5c9da] w-2.5"
                 }`}
                 aria-label={`Go to testimonial ${i + 1}`}
               />
@@ -544,112 +619,24 @@ function TestimonialsSection({
           </div>
         </div>
       </div>
-    </section>
+    </AnimatedSection>
   )
 }
 
-/* -------------------------------------- */
-/* ---------- MAIN LANDING PAGE ---------- */
-/* -------------------------------------- */
+/* ============================= */
+/* ======= الصفحة الرئيسية ====== */
+/* ============================= */
 
 export default function UmmahAcademyLanding() {
   const [language, setLanguage] = useState<Language>("ar")
   const [currency, setCurrency] = useState<Currency>(currencyRates.USD)
   const [isLoading, setIsLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [pageLoaded, setPageLoaded] = useState(false)
 
   const t = translations[language]
   const isRTL = language === "ar"
 
-  const trackWhatsAppClick = () => {
-    try {
-      const fbqFn = (window as any)?.fbq
-      if (typeof fbqFn === "function") {
-        fbqFn("trackCustom", "WhatsAppClick")
-      }
-    } catch {
-      // ignore
-    }
-  }
-
-  // كشف الدولة والعملة واللغة (مثل الموقع الحالي)
-  useEffect(() => {
-    const detectLocationAndCurrency = async () => {
-      try {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 5000)
-
-        const response = await fetch("https://ipapi.co/json/", {
-          signal: controller.signal,
-          headers: { Accept: "application/json" },
-        })
-
-        clearTimeout(timeoutId)
-
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-
-        const data: LocationData = await response.json()
-
-        const countryToCurrency: Record<string, keyof typeof currencyRates> = {
-          EG: "EGP",
-          SA: "SAR",
-          AE: "SAR",
-          KW: "SAR",
-          QA: "SAR",
-          BH: "SAR",
-        }
-
-        const detectedCurrency = countryToCurrency[data.country_code] || "USD"
-        if (currencyRates[detectedCurrency]) setCurrency(currencyRates[detectedCurrency])
-
-        const arabicCountries = ["EG", "SA", "AE", "KW", "QA", "BH", "OM", "JO", "LB", "SY", "IQ", "YE", "PS", "MA", "TN", "DZ", "LY", "SD"]
-        setLanguage(arabicCountries.includes(data.country_code) ? "ar" : "en")
-      } catch (error) {
-        console.error("Error detecting location:", error)
-        setCurrency(currencyRates.USD)
-        setLanguage("ar")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    detectLocationAndCurrency()
-  }, [])
-
-  const formatPrice = (usdPrice: number) => {
-    const convertedPrice = Math.round(usdPrice * currency.rate)
-    return `${currency.symbol}${convertedPrice}`
-  }
-
-  const toggleLanguage = () =>
-    setLanguage((prev) => (prev === "ar" ? "en" : "ar"))
-
-  const scrollToSection = (id: string) => {
-    const el = document.getElementById(id)
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" })
-    }
-    setMenuOpen(false)
-  }
-
-  // رابط واتساب
-  const waBase = "https://wa.me/201505532052?text="
-  const waMsgAr = "أريد حجز حصة مجانية للتجربة من خلال أكاديمية أمة مسلمة"
-  const waMsgEn = "I would like to book a free trial lesson with Muslim Ummah Academy"
-  const whatsappLink = `${waBase}${encodeURIComponent(language === "ar" ? waMsgAr : waMsgEn)}`
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-800 mx-auto mb-4"></div>
-          <p className="text-emerald-800">جاري التحميل... Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // بيانات الإحصائيات (تشبه "ليست مجرد أرقام" في زواد)
   const stats = [
     {
       icon: Users,
@@ -671,592 +658,736 @@ export default function UmmahAcademyLanding() {
       icon: Clock,
       value: 5,
       labelAr: "سنوات خبرة أونلاين",
-      labelEn: "years of experience",
+      labelEn: "years online",
       hintAr: "خبرة في التعليم عن بعد",
-      hintEn: "in online Qur'an teaching",
+      hintEn: "experience in online teaching",
     },
   ]
 
-  // مميزات "لماذا نحن؟" مأخوذة من فكرة موقع زواد
   const heroFeatures = [
     {
       icon: Sparkles,
       titleAr: "الحصة الأولى مجانًا",
       titleEn: "First lesson is free",
-      descAr: "جرّب التجربة قبل الاشتراك، بدون أي التزام أو رسوم.",
-      descEn: "Try the experience before subscribing – no commitment, no fees.",
-    },
-    {
-      icon: BookOpen,
-      titleAr: "حصص فردية أو مجموعات صغيرة",
-      titleEn: "1‑to‑1 or small groups",
-      descAr: "جلسات مريحة تضمن وقتًا كافيًا لكل طالب أو طالبة.",
-      descEn: "Comfortable sessions that give each student enough attention.",
+      descAr:
+        "جرّب التجربة قبل الاشتراك، بدون أي التزام أو رسوم.",
+      descEn:
+        "Try the experience before subscribing, with no commitment or fees.",
     },
     {
       icon: Users,
-      titleAr: "معلمات ومعلمون ملتزمون",
-      titleEn: "Committed teachers",
-      descAr: "معلمات ومعلمون ثقات، متابعة مستمرة مع ولي الأمر.",
-      descEn: "Trustworthy teachers with continuous follow‑up with parents.",
+      titleAr: "حصص فردية ومجموعات صغيرة",
+      titleEn: "1‑to‑1 & small groups",
+      descAr:
+        "إتاحة وقت كافٍ لكل طالب مع متابعة شخصية.",
+      descEn:
+        "Plenty of time for each student with personal follow‑up.",
     },
     {
-      icon: CheckCircle,
+      icon: BookOpen,
       titleAr: "محتوى تفاعلي للأطفال",
       titleEn: "Interactive content for kids",
-      descAr: "أوراق عمل وألعاب تعليمية تثبت الحفظ وتحبّب الطفل في القرآن.",
-      descEn: "Worksheets and activities that make kids love Qur'an learning.",
+      descAr:
+        "ألعاب تعليمية وأوراق عمل تجعل الحفظ ممتعًا.",
+      descEn:
+        "Games and worksheets that make memorisation enjoyable.",
+    },
+    {
+      icon: Award,
+      titleAr: "تقارير دورية لولي الأمر",
+      titleEn: "Regular parent reports",
+      descAr:
+        "متابعة شهرية واضحة للمستوى والالتزام.",
+      descEn:
+        "Clear monthly reports on progress and commitment.",
     },
   ]
 
-  // برامج الأكاديمية (مستوحاة من أقسام "مواد زُواد")
   const programs = [
     {
       icon: BookOpen,
-      titleAr: "القرآن الكريم للأطفال",
+      titleAr: "القرآن للأطفال",
       titleEn: "Qur’an for kids",
       levelAr: "من 5 إلى 14 سنة",
       levelEn: "Ages 5–14",
-      descAr: "حفظ ومراجعة بأساليب ممتعة تناسب الأطفال، مع تركيز على الأخلاق والآداب.",
+      descAr:
+        "حفظ، تلاوة، آداب، وقصص تربوية في جو مرح من البيت.",
       descEn:
-        "Memorisation and revision with enjoyable methods, plus focus on manners and values.",
-      badgeAr: "الأكثر طلبًا",
-      badgeEn: "Most popular",
+        "Memorisation, recitation, manners and stories in a joyful setting.",
+      highlight: true,
     },
     {
       icon: BookOpen,
       titleAr: "القرآن لغير الناطقين بالعربية",
       titleEn: "Qur’an for non‑Arabic speakers",
-      levelAr: "للكبار والصغار",
-      levelEn: "For adults & kids",
-      descAr: "تعليم الحروف، التلاوة الصحيحة، وبناء مفردات عربية أساسية.",
+      levelAr: "مستويات متعددة للكبار والصغار",
+      levelEn: "Levels for adults & kids",
+      descAr:
+        "تعليم الحروف، المخارج الصحيحة، وبناء مفردات عربية أساسية.",
       descEn:
-        "Learn letters, correct recitation and build essential Arabic vocabulary.",
-      badgeAr: "مخصص للجاليات",
-      badgeEn: "Ideal for diaspora",
+        "Learn letters, correct pronunciation and essential Arabic vocabulary.",
+      highlight: false,
     },
     {
       icon: Award,
-      titleAr: "كورس التجويد للكبار",
+      titleAr: "تجويد للكبار",
       titleEn: "Tajweed for adults",
-      levelAr: "مستوى تمهيدي ومتقدم",
-      levelEn: "Introductory & advanced levels",
-      descAr: "شرح مبسّط لقواعد التجويد مع تطبيق مباشر وتقييم منتظم.",
+      levelAr: "من التمهيدي حتى الإتقان",
+      levelEn: "From basics to mastery",
+      descAr:
+        "شرح مبسّط مع تطبيق عملي وتقييمات صوتية منتظمة.",
       descEn:
-        "Clear explanation of tajweed rules with direct application and frequent feedback.",
-      badgeAr: "للباحثين عن الإتقان",
-      badgeEn: "For serious learners",
+        "Clear explanations with practical application and regular feedback.",
+      highlight: false,
     },
     {
       icon: Users,
-      titleAr: "التربية الإسلامية (للأطفال)",
-      titleEn: "Islamic studies for kids",
-      levelAr: "قيم وسلوك وأذكار",
-      levelEn: "Values, manners & adhkār",
-      descAr: "أساسيات العقيدة والعبادة والسلوك اليومي بلغة محببة للأطفال.",
+      titleAr: "قيم وتربية إسلامية",
+      titleEn: "Islamic values & tarbiyah",
+      levelAr: "للأطفال والمراهقين",
+      levelEn: "For kids & teens",
+      descAr:
+        "سلوكيات يومية، أذكار، وقصص نبوية تبني شخصية قرآنية.",
       descEn:
-        "Basic aqeedah, worship and daily manners taught in a child‑friendly way.",
-      badgeAr: "بناء شخصية قرآنية",
-      badgeEn: "Build a Qur’anic character",
+        "Daily manners, adhkār and prophetic stories to build a Qur’anic character.",
+      highlight: false,
     },
   ]
 
-  // برامج خاصة (مسابقات – سوبر أمة – قدسنا)
   const specialTracks = [
     {
       titleAr: "مسابقات أمة",
       titleEn: "Ummah competitions",
       descAr:
-        "مسابقات شهرية ورمضانية في الحفظ والمراجعة، مع لوحات شرف وجوائز تحفيزية.",
+        "مسابقات شهرية ورمضانية في الحفظ والمراجعة مع لوحات شرف وجوائز تحفيزية.",
       descEn:
-        "Monthly and Ramadan competitions in memorisation and revision, with leaderboards and prizes.",
+        "Monthly and Ramadan competitions with leaderboards and motivating prizes.",
       pointsAr: [
-        "أسئلة تفاعلية تناسب العمر",
-        "شهادات إلكترونية للفائزين",
-        "تحفيز دائم على المراجعة",
+        "تشجيع دائم على المراجعة",
+        "جوائز وشهادات مميزة",
+        "مناسب لمختلف الأعمار",
       ],
       pointsEn: [
-        "Age‑appropriate interactive questions",
-        "Digital certificates for winners",
-        "Constant motivation to revise",
+        "Continuous revision motivation",
+        "Special prizes & certificates",
+        "Suitable for various ages",
       ],
     },
     {
       titleAr: "برنامج سوبر أمة",
       titleEn: "Super Ummah program",
       descAr:
-        "مسار مكثف لطلاب لديهم أهداف كبيرة في الحفظ، بخطط أسبوعية دقيقة ومتابعة لصيقة.",
+        "مسار مكثّف لطلاب لديهم أهداف كبيرة في الحفظ مع مجموعات صغيرة وخطط أسبوعية دقيقة.",
       descEn:
-        "Intensive track for highly‑motivated students, with detailed weekly plans and close follow‑up.",
+        "Intensive track for highly‑motivated students with small groups and detailed weekly plans.",
       pointsAr: [
-        "مجموعات صغيرة جدًا",
-        "خطة حفظ ومراجعة متوازنة",
-        "تقارير شهرية لولي الأمر",
+        "مجموعات محدودة جدًا",
+        "خطة متوازنة بين الحفظ والمراجعة",
+        "تقارير لصيقة لولي الأمر",
       ],
       pointsEn: [
         "Very small groups",
-        "Balanced memorisation + revision plan",
-        "Monthly reports for parents",
+        "Balanced hifdh + revision plans",
+        "Close reporting for parents",
       ],
     },
     {
-      titleAr: "برنامج قُدسنا",
-      titleEn: "Our Quds program",
-      descAr:
-        "برنامج تعريفي عن فلسطين والقدس والمسجد الأقصى يزرع الانتماء ويعرّف الأطفال بالقضية.",
-      descEn:
-        "Program about Palestine, Al‑Quds and Al‑Aqsa that builds a deep sense of identity and awareness.",
+      titleAr: translations.ar.qudsTitle,
+      titleEn: translations.en.qudsTitle,
+      descAr: translations.ar.qudsText,
+      descEn: translations.en.qudsText,
       pointsAr: [
-        "قصص وحكايات ملهمة",
-        "أنشطة ورسومات عن القدس",
-        "تعريف مبسّط بتاريخ القضية",
+        "قصص عن فلسطين والقدس والأقصى",
+        "أنشطة ورسومات للأطفال",
+        "تعزيز الانتماء لقضايا الأمة",
       ],
       pointsEn: [
-        "Inspiring stories and narratives",
-        "Activities and drawings about Al‑Quds",
-        "Simplified introduction to the history of the cause",
+        "Stories about Palestine and Al‑Quds",
+        "Activities and crafts for kids",
+        "Strengthening belonging to the Ummah",
       ],
     },
   ]
 
-  // خطط الأسعار (قابلة للتعديل حسب رغبتك)
   const pricingPlans = [
     {
       key: "basic",
-      name: t.basicPlan,
       usdPrice: 29,
-      sessions: language === "ar" ? "4" : "4",
+      sessions: 4,
+      name: t.basicPlan,
       highlight: false,
     },
     {
       key: "standard",
-      name: t.standardPlan,
       usdPrice: 49,
-      sessions: language === "ar" ? "8" : "8",
+      sessions: 8,
+      name: t.standardPlan,
       highlight: true,
     },
     {
       key: "premium",
-      name: t.premiumPlan,
       usdPrice: 79,
-      sessions: language === "ar" ? "12" : "12",
+      sessions: 12,
+      name: t.premiumPlan,
       highlight: false,
     },
   ]
 
-  return (
-    <div
-      className={`min-h-screen bg-gradient-to-b from-emerald-50 to-white ${
-        isRTL ? "rtl" : "ltr"
-      }`}
-      dir={isRTL ? "rtl" : "ltr"}
-    >
-      {/* شريط علوي ثابت (هيدر) */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur border-b border-emerald-100">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          {/* لوجو + اسم الأكاديمية */}
-          <div className="flex items-center gap-3">
-            <img
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo-PFiwOQmUO2XqQEdFh8evsswZet7bO5.png"
-              alt="Ummah Muslimah Academy Logo"
-              className="h-10 w-10 rounded-full border border-emerald-100 object-cover bg-white"
-            />
-            <div className="leading-tight">
-              <div className="font-semibold text-emerald-900 text-sm md:text-base">
-                {isRTL ? t.academyName : t.academyNameEn}
-              </div>
-              <p className="text-xs text-emerald-600 hidden sm:block">
-                {isRTL
-                  ? "تعليم القرآن والتجويد أونلاين"
-                  : "Online Qur'an & Tajweed academy"}
-              </p>
-            </div>
-          </div>
+  /* ---------- تتبع زر واتساب (لو عندك fbq) ---------- */
+  const trackWhatsAppClick = () => {
+    try {
+      const fbqFn = (window as any)?.fbq
+      if (typeof fbqFn === "function") {
+        fbqFn("trackCustom", "WhatsAppClick")
+      }
+    } catch {
+      // ignore
+    }
+  }
 
-          {/* قائمة ديسكتوب */}
-          <nav className="hidden md:flex items-center gap-6">
-            <button
-              onClick={() => scrollToSection("about")}
-              className="text-sm font-medium text-emerald-800 hover:text-emerald-600"
-            >
-              {t.menuAbout}
-            </button>
-            <button
-              onClick={() => scrollToSection("services")}
-              className="text-sm font-medium text-emerald-800 hover:text-emerald-600"
-            >
-              {t.menuServices}
-            </button>
-            <button
-              onClick={() => scrollToSection("pricing")}
-              className="text-sm font-medium text-emerald-800 hover:text-emerald-600"
-            >
-              {t.menuPricing}
-            </button>
-            <button
-              onClick={() => scrollToSection("videos")}
-              className="text-sm font-medium text-emerald-800 hover:text-emerald-600"
-            >
-              {t.menuVideos}
-            </button>
-            <button
-              onClick={() => scrollToSection("testimonials")}
-              className="text-sm font-medium text-emerald-800 hover:text-emerald-600"
-            >
-              {t.menuTestimonials}
-            </button>
-            <button
-              onClick={() => scrollToSection("contact")}
-              className="text-sm font-medium text-emerald-800 hover:text-emerald-600"
-            >
-              {t.menuContact}
-            </button>
-          </nav>
+  /* ---------- كشف الدولة / العملة / اللغة ---------- */
+  useEffect(() => {
+    const detectLocationAndCurrency = async () => {
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000)
 
-          {/* أزرار اللغة + واتساب + منيو موبايل */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleLanguage}
-              className="border-emerald-200 text-emerald-800 bg-white/70 hover:bg-emerald-50"
-            >
-              <Globe className="h-4 w-4" />
-              <span className={isRTL ? "mr-1" : "ml-1"}>
-                {language === "ar" ? "English" : "العربية"}
-              </span>
-            </Button>
+        const res = await fetch("https://ipapi.co/json/", {
+          signal: controller.signal,
+          headers: { Accept: "application/json" },
+        })
 
-            <Button
-              size="sm"
-              className="bg-emerald-800 text-yellow-300 hover:bg-emerald-900 hidden sm:inline-flex"
-              onClick={() => {
-                trackWhatsAppClick()
-                window.open(whatsappLink, "_blank")
-              }}
-            >
-              <MessageCircle className="h-4 w-4" />
-              <span className={isRTL ? "mr-1" : "ml-1"}>{t.subscribeTop}</span>
-            </Button>
+        clearTimeout(timeoutId)
 
-            {/* زر منيو موبايل */}
-            <button
-              className="md:hidden p-2 rounded-full border border-emerald-100 hover:bg-emerald-50"
-              onClick={() => setMenuOpen((prev) => !prev)}
-              aria-label={isRTL ? "القائمة" : "Menu"}
-            >
-              {menuOpen ? (
-                <X className="h-5 w-5 text-emerald-800" />
-              ) : (
-                <Menu className="h-5 w-5 text-emerald-800" />
-              )}
-            </button>
-          </div>
+        if (!res.ok) throw new Error("Network error")
+
+        const data: LocationData = await res.json()
+
+        const countryToCurrency: Record<string, keyof typeof currencyRates> = {
+          EG: "EGP",
+          SA: "SAR",
+          AE: "SAR",
+          KW: "SAR",
+          QA: "SAR",
+          BH: "SAR",
+        }
+
+        const detectedCurrency = countryToCurrency[data.country_code] || "USD"
+        if (currencyRates[detectedCurrency]) {
+          setCurrency(currencyRates[detectedCurrency])
+        }
+
+        const arabicCountries = [
+          "EG",
+          "SA",
+          "AE",
+          "KW",
+          "QA",
+          "BH",
+          "OM",
+          "JO",
+          "LB",
+          "SY",
+          "IQ",
+          "YE",
+          "PS",
+          "MA",
+          "TN",
+          "DZ",
+          "LY",
+          "SD",
+        ]
+
+        setLanguage(
+          arabicCountries.includes(data.country_code) ? "ar" : "en"
+        )
+      } catch {
+        setCurrency(currencyRates.USD)
+        setLanguage("ar")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    detectLocationAndCurrency()
+  }, [])
+
+  /* ---------- أنيميشن دخول الهيرو ---------- */
+  useEffect(() => {
+    const timeout = setTimeout(() => setPageLoaded(true), 80)
+    return () => clearTimeout(timeout)
+  }, [])
+
+  const toggleLanguage = () =>
+    setLanguage((prev) => (prev === "ar" ? "en" : "ar"))
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id)
+    if (el) el.scrollIntoView({ behavior: "smooth" })
+    setMenuOpen(false)
+  }
+
+  const formatPrice = (usdPrice: number) => {
+    const converted = Math.round(usdPrice * currency.rate)
+    return `${currency.symbol}${converted}`
+  }
+
+  const waBase = "https://wa.me/201505532052?text="
+  const waMsgAr =
+    "أريد حجز حصة تجريبية مجانية مع أكاديمية أمة مسلمة"
+  const waMsgEn =
+    "I would like to book a free trial lesson with Muslim Ummah Academy"
+  const whatsappLink = `${waBase}${encodeURIComponent(
+    language === "ar" ? waMsgAr : waMsgEn
+  )}`
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#fdf3f8]">
+        <div className="text-center">
+          <div className="h-12 w-12 rounded-full border-2 border-[#f7d66e] border-t-transparent animate-spin mx-auto mb-4" />
+          <p className="text-[#8f1238] text-sm">
+            {isRTL ? "جاري تجهيز الأكاديمية..." : "Loading the academy..."}
+          </p>
         </div>
+      </div>
+    )
+  }
 
-        {/* قائمة موبايل منسدلة */}
-        {menuOpen && (
-          <div className="md:hidden border-t border-emerald-100 bg-white/95">
-            <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
-              <button
-                onClick={() => scrollToSection("about")}
-                className="w-full text-emerald-800 hover:text-emerald-600 text-sm font-medium"
-              >
-                {t.menuAbout}
-              </button>
-              <button
-                onClick={() => scrollToSection("services")}
-                className="w-full text-emerald-800 hover:text-emerald-600 text-sm font-medium"
-              >
-                {t.menuServices}
-              </button>
-              <button
-                onClick={() => scrollToSection("pricing")}
-                className="w-full text-emerald-800 hover:text-emerald-600 text-sm font-medium"
-              >
-                {t.menuPricing}
-              </button>
-              <button
-                onClick={() => scrollToSection("videos")}
-                className="w-full text-emerald-800 hover:text-emerald-600 text-sm font-medium"
-              >
-                {t.menuVideos}
-              </button>
-              <button
-                onClick={() => scrollToSection("testimonials")}
-                className="w-full text-emerald-800 hover:text-emerald-600 text-sm font-medium"
-              >
-                {t.menuTestimonials}
-              </button>
-              <button
-                onClick={() => scrollToSection("contact")}
-                className="w-full text-emerald-800 hover:text-emerald-600 text-sm font-medium"
-              >
-                {t.menuContact}
-              </button>
-
-              <Button
-                size="sm"
-                className="mt-2 bg-emerald-800 text-yellow-300 hover:bg-emerald-900 w-full"
-                onClick={() => {
-                  trackWhatsAppClick()
-                  window.open(whatsappLink, "_blank")
-                }}
-              >
-                <MessageCircle className="h-4 w-4" />
-                <span className={isRTL ? "mr-1" : "ml-1"}>{t.subscribeTop}</span>
-              </Button>
-            </div>
-          </div>
-        )}
-      </header>
-
-      {/* محتوى الصفحة */}
-      <main className="pt-24 md:pt-28">
-        {/* هيرو – مستوحى من هيرو زواد لكن بالهوية الخضراء */}
-        <section
-          id="hero"
-          className="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700"
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_55%)]" />
-          <div className="container mx-auto px-4 py-16 md:py-24 relative">
-            <div className="grid gap-12 items-center md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-              {/* نص الهيرو */}
-              <div className={isRTL ? "md:pl-10" : "md:pr-10"}>
-                <Badge className="mb-4 bg-yellow-400 text-emerald-900 border-none rounded-full px-4 py-1 text-xs md:text-sm">
-                  {t.heroAyah}
-                </Badge>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-4">
-                  {t.heroTagline}
-                </h1>
-                <p className="text-lg md:text-xl text-white/80 mb-6 max-w-xl">
-                  {t.heroSubtitle}
-                </p>
-
-                {/* مميزات سريعة تحت الهيرو (مثل 4 نقاط في زواد) */}
-                <div className="grid grid-cols-2 gap-3 mb-8 max-w-xl">
-                  {heroFeatures.slice(0, 2).map((f, idx) => {
-                    const Icon = f.icon
-                    return (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-2 rounded-2xl bg-emerald-900/40 border border-emerald-700/60 px-3 py-2"
-                      >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-950/60 border border-emerald-700">
-                          <Icon className="h-4 w-4 text-yellow-300" />
-                        </div>
-                        <p className="text-xs sm:text-sm text-emerald-50 font-medium">
-                          {isRTL ? f.titleAr : f.titleEn}
-                        </p>
-                      </div>
-                    )
-                  })}
+  return (
+    <>
+      <div
+        dir={isRTL ? "rtl" : "ltr"}
+        className={`min-h-screen bg-[#fff6f2] text-[#3c0020] ${
+          isRTL ? "rtl" : "ltr"
+        }`}
+      >
+        {/* الهيدر – ثابت مثل زواد */}
+        <header className="fixed top-0 left-0 right-0 z-50">
+          <div className="container mx-auto px-4">
+            <div className="mt-3 bg-[#8f1238] text-white rounded-[999px] shadow-xl flex items-center justify-between gap-4 px-4 sm:px-6 py-2.5 border border-[#f7d66e]/30 header-blur">
+              {/* لوجو + اسم الأكاديمية */}
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center border border-[#f7d66e]/40 soft-shadow-sm">
+                  <span className="text-xs font-extrabold tracking-[0.14em] text-[#8f1238]">
+                    أمة
+                  </span>
                 </div>
+                <div className="leading-tight hidden sm:block">
+                  <p className="font-semibold text-xs sm:text-sm">
+                    {isRTL ? t.academyName : t.academyNameEn}
+                  </p>
+                  <p className="text-[10px] text-[#fbeaf6]">
+                    {isRTL
+                      ? "تعليم القرآن والتجويد أونلاين"
+                      : "Online Qur'an & Tajweed academy"}
+                  </p>
+                </div>
+              </div>
 
-                {/* أزرار CTA */}
-                <div className="flex flex-wrap items-center gap-3">
+              {/* القائمة – ديسكتوب */}
+              <nav className="hidden md:flex items-center gap-5 text-xs font-medium">
+                <button
+                  onClick={() => scrollToSection("about")}
+                  className="hover:text-[#f7d66e] transition-colors"
+                >
+                  {t.menuAbout}
+                </button>
+                <button
+                  onClick={() => scrollToSection("programs")}
+                  className="hover:text-[#f7d66e] transition-colors"
+                >
+                  {t.menuPrograms}
+                </button>
+                <button
+                  onClick={() => scrollToSection("pricing")}
+                  className="hover:text-[#f7d66e] transition-colors"
+                >
+                  {t.menuPricing}
+                </button>
+                <button
+                  onClick={() => scrollToSection("videos")}
+                  className="hover:text-[#f7d66e] transition-colors"
+                >
+                  {t.menuVideos}
+                </button>
+                <button
+                  onClick={() => scrollToSection("testimonials")}
+                  className="hover:text-[#f7d66e] transition-colors"
+                >
+                  {t.menuTestimonials}
+                </button>
+                <button
+                  onClick={() => scrollToSection("contact")}
+                  className="hover:text-[#f7d66e] transition-colors"
+                >
+                  {t.menuContact}
+                </button>
+              </nav>
+
+              {/* يمين الهيدر */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleLanguage}
+                  className="border-[#f7d66e]/40 text-white bg-white/10 hover:bg-white/20 text-[11px] h-8 px-2"
+                >
+                  <Globe className="h-3.5 w-3.5" />
+                  <span className={isRTL ? "mr-1" : "ml-1"}>
+                    {language === "ar" ? "English" : "العربية"}
+                  </span>
+                </Button>
+
+                <Button
+                  size="sm"
+                  className="hidden sm:inline-flex bg-[#f7d66e] text-[#3c0020] hover:bg-[#ffe086] text-[11px] h-8 px-3 soft-shadow-sm"
+                  onClick={() => {
+                    trackWhatsAppClick()
+                    window.open(whatsappLink, "_blank")
+                  }}
+                >
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  <span className={isRTL ? "mr-1" : "ml-1"}>
+                    {t.subscribeTop}
+                  </span>
+                </Button>
+
+                {/* منيو موبايل */}
+                <button
+                  className="md:hidden h-8 w-8 rounded-full bg-white/10 border border-white/30 flex items-center justify-center"
+                  onClick={() => setMenuOpen((prev) => !prev)}
+                  aria-label={isRTL ? "القائمة" : "Menu"}
+                >
+                  {menuOpen ? (
+                    <X className="h-4 w-4" />
+                  ) : (
+                    <Menu className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* قائمة موبايل منسدلة */}
+            {menuOpen && (
+              <div className="mt-3 mb-2 rounded-3xl bg-[#8f1238] text-white shadow-lg border border-[#f7d66e]/30 md:hidden">
+                <div className="px-5 py-3 flex flex-col gap-2 text-sm">
+                  <button
+                    onClick={() => scrollToSection("about")}
+                    className="text-left py-1 hover:text-[#f7d66e]"
+                  >
+                    {t.menuAbout}
+                  </button>
+                  <button
+                    onClick={() => scrollToSection("programs")}
+                    className="text-left py-1 hover:text-[#f7d66e]"
+                  >
+                    {t.menuPrograms}
+                  </button>
+                  <button
+                    onClick={() => scrollToSection("pricing")}
+                    className="text-left py-1 hover:text-[#f7d66e]"
+                  >
+                    {t.menuPricing}
+                  </button>
+                  <button
+                    onClick={() => scrollToSection("videos")}
+                    className="text-left py-1 hover:text-[#f7d66e]"
+                  >
+                    {t.menuVideos}
+                  </button>
+                  <button
+                    onClick={() => scrollToSection("testimonials")}
+                    className="text-left py-1 hover:text-[#f7d66e]"
+                  >
+                    {t.menuTestimonials}
+                  </button>
+                  <button
+                    onClick={() => scrollToSection("contact")}
+                    className="text-left py-1 hover:text-[#f7d66e]"
+                  >
+                    {t.menuContact}
+                  </button>
+
                   <Button
-                    size="lg"
-                    className="bg-yellow-400 hover:bg-yellow-300 text-emerald-900 font-semibold shadow-lg"
+                    className="mt-2 bg-[#f7d66e] text-[#3c0020] hover:bg-[#ffe086]"
                     onClick={() => {
                       trackWhatsAppClick()
                       window.open(whatsappLink, "_blank")
                     }}
                   >
-                    <MessageCircle className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"}`} />
-                    {t.heroPrimaryCta}
+                    <MessageCircle
+                      className={`h-4 w-4 ${
+                        isRTL ? "ml-2" : "mr-2"
+                      }`}
+                    />
+                    {t.subscribeTop}
                   </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-emerald-200 bg-white/5 text-white hover:bg-white/10"
-                    onClick={() => scrollToSection("videos")}
-                  >
-                    <PlayCircle className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"}`} />
-                    {t.heroSecondaryCta}
-                  </Button>
-                </div>
-
-                {/* أرقام سريعة في الهيرو */}
-                <div className="mt-8 grid grid-cols-3 gap-4 max-w-md">
-                  <div>
-                    <p className="text-sm text-emerald-100">
-                      {isRTL ? "طلاب نشطون" : "Active students"}
-                    </p>
-                    <p className="text-2xl font-bold text-yellow-300">
-                      {isRTL ? (
-                        <CountUp to={1200} suffix="+" />
-                      ) : (
-                        <CountUp to={1200} prefix="+" />
-                      )}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-emerald-100">
-                      {isRTL ? "دول حول العالم" : "Countries"}
-                    </p>
-                    <p className="text-2xl font-bold text-yellow-300">
-                      {isRTL ? (
-                        <CountUp to={40} suffix="+" />
-                      ) : (
-                        <CountUp to={40} prefix="+" />
-                      )}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-emerald-100">
-                      {isRTL ? "سنوات خبرة" : "Years online"}
-                    </p>
-                    <p className="text-2xl font-bold text-yellow-300">
-                      <CountUp to={5} suffix={isRTL ? "+" : "+"} />
-                    </p>
-                  </div>
                 </div>
               </div>
+            )}
+          </div>
+        </header>
 
-              {/* عمود الصورة / الكارت (بديل لصورة الهيرو في زواد) */}
-              <div className="relative">
-                <div className="relative rounded-3xl bg-emerald-900/40 border border-emerald-700/70 shadow-2xl p-4 md:p-5">
-                  <div className="rounded-2xl overflow-hidden border border-emerald-700/70 mb-4">
-                    <img
-                      src="/images/hero-quran.avif"
-                      alt="Child reading Qur'an"
-                      className="w-full h-full object-cover"
-                    />
+        {/* محتوى الصفحة */}
+        <main className="pt-28 md:pt-32">
+          {/* ====== HERO ====== */}
+          <section className="relative overflow-hidden bg-gradient-to-br from-[#fff5ef] via-[#ffeae4] to-[#fbeaf6]">
+            <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
+              <div className="grid gap-10 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] items-center">
+                {/* نص الهيرو */}
+                <div
+                  className={`transition-all duration-700 ease-out ${
+                    pageLoaded
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-5"
+                  } ${isRTL ? "md:pl-10" : "md:pr-10"}`}
+                >
+                  <Badge className="mb-4 bg-[#f7d66e]/30 text-[#8f1238] border-[#f7d66e]/40 rounded-full px-4 py-1 text-xs font-semibold">
+                    {t.heroAyah}
+                  </Badge>
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#3c0020] leading-tight mb-4 tracking-tight">
+                    {t.heroTagline}
+                  </h1>
+                  <p className="text-base md:text-lg text-[#5b1734]/85 mb-6 max-w-xl">
+                    {t.heroSubtitle}
+                  </p>
+
+                  {/* مميزات سريعة */}
+                  <div className="grid grid-cols-2 gap-3 mb-7 max-w-xl">
+                    {heroFeatures.slice(0, 2).map((f, idx) => {
+                      const Icon = f.icon
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2 rounded-2xl bg-white/80 border border-[#f1c5e0]/60 px-3 py-2 soft-shadow-sm"
+                        >
+                          <div className="icon-bubble h-8 w-8 rounded-2xl bg-[#8f1238] flex items-center justify-center border border-[#f7d66e]/50">
+                            <Icon className="h-4 w-4 text-[#f7d66e]" />
+                          </div>
+                          <div className="text-[11px] font-semibold text-[#3c0020]">
+                            {isRTL ? f.titleAr : f.titleEn}
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <div>
-                        <p className="text-xs text-emerald-100">
-                          {isRTL ? "رحلتك مع القرآن تبدأ من هنا" : "Your Qur'an journey starts here"}
-                        </p>
-                        <p className="font-semibold text-white">
-                          {isRTL ? t.academyName : t.academyNameEn}
-                        </p>
-                      </div>
-                      <Badge className="bg-yellow-400 text-emerald-900 border-none">
-                        <Sparkles className="h-3 w-3 mx-1" />
-                        {isRTL ? "حصة مجانية" : "Free trial"}
-                      </Badge>
+
+                  {/* CTA buttons */}
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button
+                      size="lg"
+                      className="bg-[#f7d66e] hover:bg-[#ffe086] text-[#3c0020] font-semibold px-6 py-2 rounded-full soft-shadow-sm hover:-translate-y-0.5 transition-transform"
+                      onClick={() => {
+                        trackWhatsAppClick()
+                        window.open(whatsappLink, "_blank")
+                      }}
+                    >
+                      <MessageCircle
+                        className={`h-5 w-5 ${
+                          isRTL ? "ml-2" : "mr-2"
+                        }`}
+                      />
+                      {t.heroPrimaryCta}
+                    </Button>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-[#8f1238]/40 text-[#8f1238] bg-white/70 hover:bg-white rounded-full px-6 py-2 hover:-translate-y-0.5 transition-transform soft-shadow-sm"
+                      onClick={() => scrollToSection("videos")}
+                    >
+                      <PlayCircle
+                        className={`h-5 w-5 ${
+                          isRTL ? "ml-2" : "mr-2"
+                        }`}
+                      />
+                      {t.heroSecondaryCta}
+                    </Button>
+                  </div>
+
+                  {/* أرقام سريعة */}
+                  <div className="mt-8 grid grid-cols-3 gap-4 max-w-md text-xs">
+                    <div>
+                      <p className="text-[#5b1734]/80 mb-1">
+                        {isRTL ? "طلاب نشطون" : "Active students"}
+                      </p>
+                      <p className="text-xl font-extrabold text-[#3c0020]">
+                        <CountUp
+                          to={1200}
+                          suffix={isRTL ? "+" : "+"}
+                        />
+                      </p>
                     </div>
-                    <div className="grid grid-cols-2 gap-3 text-xs text-emerald-100">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-yellow-300" />
-                        <span>{isRTL ? "متابعة أسبوعية" : "Weekly follow‑up"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-yellow-300" />
-                        <span>{isRTL ? "أوقات مرنة" : "Flexible timings"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-yellow-300" />
-                        <span>{isRTL ? "مجموعات صغيرة" : "Small groups"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Award className="h-4 w-4 text-yellow-300" />
-                        <span>{isRTL ? "شهادات معتمدة" : "Certificates"}</span>
-                      </div>
+                    <div>
+                      <p className="text-[#5b1734]/80 mb-1">
+                        {isRTL ? "دول حول العالم" : "Countries"}
+                      </p>
+                      <p className="text-xl font-extrabold text-[#3c0020]">
+                        <CountUp
+                          to={40}
+                          suffix={isRTL ? "+" : "+"}
+                        />
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[#5b1734]/80 mb-1">
+                        {isRTL ? "سنوات خبرة" : "Years online"}
+                      </p>
+                      <p className="text-xl font-extrabold text-[#3c0020]">
+                        <CountUp
+                          to={5}
+                          suffix={isRTL ? "+" : "+"}
+                        />
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                {/* كارت صغير عائم مثل Pop-up */}
-                <div className="absolute -bottom-6 -left-2 md:-left-6 bg-white/95 rounded-2xl shadow-lg border border-emerald-100 px-4 py-3 flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-emerald-50 flex items-center justify-center">
-                    <BookOpen className="h-4 w-4 text-emerald-700" />
+                {/* صورة الهيرو */}
+                <div
+                  className={`relative transition-all duration-700 ease-out ${
+                    pageLoaded
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-5"
+                  }`}
+                >
+                  <div className="relative rounded-[32px] overflow-hidden soft-shadow hero-float border border-[#f1c5e0]/60">
+                    <img
+                      src="/images/banner-mobile.webp"
+                      alt="Child learning online"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#3c0020]/50 via-transparent to-transparent pointer-events-none" />
                   </div>
-                  <div className="text-xs">
-                    <p className="font-semibold text-emerald-900">
-                      {isRTL ? "حفظ – تجويد – تربية" : "Hifdh • Tajweed • Tarbiyah"}
-                    </p>
-                    <p className="text-emerald-600">
-                      {isRTL ? "منهج متكامل للأسرة" : "A complete path for families"}
-                    </p>
+
+                  {/* بطاقة صغيرة عائمة */}
+                  <div className="absolute -bottom-5 -left-1 md:-left-4 bg-white/95 rounded-2xl border border-[#f1c5e0]/70 px-4 py-3 soft-shadow flex items-center gap-3">
+                    <div className="icon-bubble h-9 w-9 rounded-2xl bg-[#8f1238] flex items-center justify-center border border-[#f7d66e]/50">
+                      <Award className="h-4 w-4 text-[#f7d66e]" />
+                    </div>
+                    <div className="text-[11px]">
+                      <p className="font-semibold text-[#3c0020]">
+                        {isRTL
+                          ? "أكثر من 5 سنوات خبرة"
+                          : "5+ years experience"}
+                      </p>
+                      <p className="text-[#5b1734]/80">
+                        {isRTL
+                          ? "معلمات ومعلمون مجازون"
+                          : "Qualified, trusted teachers"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* عن الأكاديمية + ليست مجرد أرقام */}
-        <section id="about" className="py-20 bg-white scroll-mt-24">
-          <div className="container mx-auto px-4">
-            <div className="grid gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] items-start">
-              {/* النص عن الرسالة */}
-              <div>
-                <Badge className="mb-3 bg-emerald-100 text-emerald-800 border-emerald-200">
-                  {isRTL ? "عن الأكاديمية" : "About the academy"}
-                </Badge>
-                <h2 className="text-3xl md:text-4xl font-bold text-emerald-900 mb-4">
-                  {t.whyUsTitle}
-                </h2>
-                <p className="text-lg text-emerald-800/90 mb-6">{t.whyUsSubtitle}</p>
-                <h3 className="text-xl font-semibold text-emerald-900 mb-2">{t.missionTitle}</h3>
-                <p className="text-emerald-800/90 leading-relaxed mb-8">{t.missionText}</p>
+          {/* ====== عن الأكاديمية ====== */}
+          <AnimatedSection
+            id="about"
+            className="py-20 bg-white scroll-mt-28"
+          >
+            <div className="container mx-auto px-4">
+              <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] items-start">
+                {/* نص */}
+                <div>
+                  <Badge className="mb-3 bg-[#8f1238]/10 text-[#8f1238] border-[#8f1238]/20">
+                    {isRTL ? "عن الأكاديمية" : "About the academy"}
+                  </Badge>
+                  <h2 className="text-3xl md:text-4xl font-extrabold text-[#3c0020] mb-3 tracking-tight">
+                    {t.whyUsTitle}
+                  </h2>
+                  <p className="text-lg text-[#5b1734]/85 mb-6">
+                    {t.whyUsSubtitle}
+                  </p>
 
-                {/* 4 مميزات في كروت صغيرة */}
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {heroFeatures.map((f, idx) => {
-                    const Icon = f.icon
-                    return (
-                      <Card
-                        key={idx}
-                        className="border-emerald-100 bg-emerald-50/60 hover:bg-emerald-50 transition-colors"
-                      >
-                        <CardContent className="flex items-start gap-3 p-4">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-emerald-100">
-                            <Icon className="h-4 w-4 text-emerald-700" />
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-sm font-semibold text-emerald-900">
-                              {isRTL ? f.titleAr : f.titleEn}
-                            </p>
-                            <p className="text-xs text-emerald-700">
-                              {isRTL ? f.descAr : f.descEn}
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )
-                  })}
+                  <h3 className="text-xl font-bold text-[#3c0020] mb-2">
+                    {t.missionTitle}
+                  </h3>
+                  <p className="text-sm text-[#5b1734]/85 mb-7 leading-relaxed">
+                    {t.missionText}
+                  </p>
+
+                  {/* مميزات */}
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {heroFeatures.map((f, idx) => {
+                      const Icon = f.icon
+                      return (
+                        <Card
+                          key={idx}
+                          className="border-[#f1c5e0]/70 bg-[#fff8fb] hover:bg-[#fff1f7] transition-colors soft-shadow-sm"
+                        >
+                          <CardContent className="flex items-start gap-3 p-4">
+                            <div className="icon-bubble h-9 w-9 rounded-2xl bg-[#8f1238] flex items-center justify-center border border-[#f7d66e]/50">
+                              <Icon className="h-4 w-4 text-[#f7d66e]" />
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-sm font-semibold text-[#3c0020]">
+                                {isRTL ? f.titleAr : f.titleEn}
+                              </p>
+                              <p className="text-[11px] text-[#5b1734]/80">
+                                {isRTL ? f.descAr : f.descEn}
+                              </p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* صورة طالبة في المسجد */}
+                <div className="relative">
+                  <div className="rounded-[32px] overflow-hidden soft-shadow border border-[#f1c5e0]/70">
+                    <img
+                      src="/images/student-child.jpg"
+                      alt="Girl reading Qur'an"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-[#8f1238] text-[#f7d66e] text-xs px-4 py-2 rounded-full shadow-lg border border-[#f7d66e]/50">
+                    {isRTL
+                      ? "بيئة آمنة، تعليم من البيت، أثر حقيقي في شخصيات الأبناء."
+                      : "Safe online environment, real impact on students’ character."}
+                  </div>
                 </div>
               </div>
 
-              {/* الإحصائيات (ليست مجرد أرقام) */}
-              <div>
-                <div className="mb-4">
-                  <h3 className="text-2xl font-bold text-emerald-900 mb-1">
-                    {t.statsTitle}
-                  </h3>
-                  <p className="text-sm text-emerald-700">{t.statsSubtitle}</p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* الإحصائيات */}
+              <div className="mt-14">
+                <h3 className="text-xl font-bold text-[#3c0020] mb-2">
+                  {t.statsTitle}
+                </h3>
+                <p className="text-sm text-[#5b1734]/80 mb-5">
+                  {t.statsSubtitle}
+                </p>
+                <div className="grid sm:grid-cols-3 gap-4">
                   {stats.map((s, idx) => {
                     const Icon = s.icon
                     return (
                       <Card
                         key={idx}
-                        className="border-emerald-100 bg-gradient-to-b from-emerald-50 to-white"
+                        className="border-[#f1c5e0]/80 bg-[#fff7fb] soft-shadow-sm"
                       >
                         <CardContent className="p-4 flex flex-col gap-2">
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100">
-                              <Icon className="h-4 w-4 text-emerald-800" />
+                          <div className="flex items-center justify-between">
+                            <div className="icon-bubble h-8 w-8 rounded-2xl bg-[#8f1238] flex items-center justify-center border border-[#f7d66e]/50">
+                              <Icon className="h-4 w-4 text-[#f7d66e]" />
                             </div>
-                            <p className="text-xl font-extrabold text-emerald-900 leading-none">
-                              {isRTL ? (
-                                <CountUp to={s.value} suffix="+" />
-                              ) : (
-                                <CountUp to={s.value} prefix="+" />
-                              )}
+                            <p className="text-2xl font-extrabold text-[#3c0020]">
+                              <CountUp
+                                to={s.value}
+                                suffix={isRTL ? "+" : "+"}
+                              />
                             </p>
                           </div>
-                          <p className="text-sm font-semibold text-emerald-900">
+                          <p className="text-sm font-semibold text-[#3c0020]">
                             {isRTL ? s.labelAr : s.labelEn}
                           </p>
-                          <p className="text-xs text-emerald-700">
+                          <p className="text-[11px] text-[#5b1734]/80">
                             {isRTL ? s.hintAr : s.hintEn}
                           </p>
                         </CardContent>
@@ -1266,301 +1397,563 @@ export default function UmmahAcademyLanding() {
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </AnimatedSection>
 
-        {/* مواد الأكاديمية (برامج) – مشابه لقسم مواد زواد */}
-        <section id="services" className="py-20 bg-emerald-50/70 scroll-mt-24">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center mb-12">
-              <Badge className="mb-3 bg-white text-emerald-800 border-emerald-200">
-                <BookOpen className="h-4 w-4 mx-1" />
-                <span>{isRTL ? "مسارات متدرجة" : "Structured tracks"}</span>
-              </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold text-emerald-900 mb-3">
-                {t.servicesTitle}
-              </h2>
-              <p className="text-lg text-emerald-800/80">{t.servicesSubtitle}</p>
+          {/* ====== مواد الأكاديمية ====== */}
+          <AnimatedSection
+            id="programs"
+            className="py-20 bg-[#fdf3f8] scroll-mt-28"
+          >
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto text-center mb-10">
+                <Badge className="mb-3 bg-white text-[#8f1238] border-[#f1c5e0]/70">
+                  <BookOpen className="h-4 w-4 mx-1" />
+                  <span>
+                    {isRTL
+                      ? "مسارات متدرجة للأطفال والكبار"
+                      : "Structured tracks for all ages"}
+                  </span>
+                </Badge>
+                <h2 className="text-3xl md:text-4xl font-extrabold text-[#3c0020] mb-3 tracking-tight">
+                  {t.programsTitle}
+                </h2>
+                <p className="text-lg text-[#5b1734]/85">
+                  {t.programsSubtitle}
+                </p>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                {programs.map((p, idx) => {
+                  const Icon = p.icon
+                  return (
+                    <Card
+                      key={idx}
+                      className={`border-[#f1c5e0]/80 bg-white/95 soft-shadow hover:-translate-y-1 hover:shadow-xl transition-all ${
+                        p.highlight
+                          ? "ring-2 ring-[#f7d66e]"
+                          : ""
+                      }`}
+                    >
+                      <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="icon-bubble h-10 w-10 rounded-2xl bg-[#8f1238] flex items-center justify-center border border-[#f7d66e]/60">
+                            <Icon className="h-5 w-5 text-[#f7d66e]" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-base md:text-lg text-[#3c0020]">
+                              {isRTL ? p.titleAr : p.titleEn}
+                            </CardTitle>
+                            <p className="text-xs text-[#5b1734]/80">
+                              {isRTL ? p.levelAr : p.levelEn}
+                            </p>
+                          </div>
+                        </div>
+                        {p.highlight && (
+                          <Badge className="bg-[#f7d66e] text-[#3c0020] border-none text-[10px]">
+                            {isRTL ? "الأكثر طلبًا" : "Most popular"}
+                          </Badge>
+                        )}
+                      </CardHeader>
+                      <CardContent className="pt-0 text-sm text-[#5b1734]/90 leading-relaxed">
+                        {isRTL ? p.descAr : p.descEn}
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+
+              {/* خلفية زخرفية بصورة مصحف عن قرب */}
+              <div className="mt-12 rounded-[32px] overflow-hidden soft-shadow border border-[#f1c5e0]/70">
+                <div className="relative">
+                  <img
+                    src="/images/quran-close.webp"
+                    alt="Qur'an close up"
+                    className="w-full h-60 md:h-72 object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#3c0020]/80 via-[#3c0020]/60 to-transparent" />
+                  <div
+                    className={`absolute inset-y-0 ${
+                      isRTL ? "right-0" : "left-0"
+                    } flex items-center px-6 sm:px-10`}
+                  >
+                    <div
+                      className={`max-w-md text-white ${
+                        isRTL ? "text-right" : "text-left"
+                      } text-sm sm:text-base`}
+                    >
+                      <p className="font-semibold mb-2">
+                        {isRTL
+                          ? "اهتمام خاص بالتجويد وتصحيح التلاوة"
+                          : "Special focus on tajweed & proper recitation"}
+                      </p>
+                      <p className="opacity-90">
+                        {isRTL
+                          ? "نساعد الطالب أن يقرأ القرآن كما أُنزل؛ مخارج سليمة، أحكام مضبوطة، وتدرّج يناسب قدراته."
+                          : "We help students recite the Qur’an with correct makhārij and tajweed, step by step at their pace."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+          </AnimatedSection>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              {programs.map((p, idx) => {
-                const Icon = p.icon
-                return (
+          {/* ====== برامج خاصة (مسابقات / سوبر / قُدسنا) ====== */}
+          <AnimatedSection className="py-20 bg-white">
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto text-center mb-10">
+                <Badge className="mb-3 bg-[#8f1238]/10 text-[#8f1238] border-[#8f1238]/20">
+                  <Sparkles className="h-4 w-4 mx-1" />
+                  <span>
+                    {isRTL
+                      ? "أكثر من مجرد حصص عادية"
+                      : "More than regular classes"}
+                  </span>
+                </Badge>
+                <h2 className="text-3xl md:text-4xl font-extrabold text-[#3c0020] mb-3 tracking-tight">
+                  {t.tracksTitle}
+                </h2>
+                <p className="text-lg text-[#5b1734]/85">
+                  {t.tracksSubtitle}
+                </p>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-3">
+                {/* عمود 1 & 2 عاديين */}
+                {specialTracks.slice(0, 2).map((track, idx) => (
                   <Card
                     key={idx}
-                    className="border-emerald-100 bg-white/90 hover:-translate-y-1 hover:shadow-lg transition-all"
+                    className="border-[#f1c5e0]/80 bg-[#fff7fb] soft-shadow h-full flex flex-col"
                   >
-                    <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-100">
-                          <Icon className="h-5 w-5 text-emerald-800" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-base md:text-lg text-emerald-900">
-                            {isRTL ? p.titleAr : p.titleEn}
-                          </CardTitle>
-                          <p className="text-xs text-emerald-700">
-                            {isRTL ? p.levelAr : p.levelEn}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge className="bg-yellow-400 text-emerald-900 border-none">
-                        {isRTL ? p.badgeAr : p.badgeEn}
-                      </Badge>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg text-[#3c0020]">
+                        {isRTL ? track.titleAr : track.titleEn}
+                      </CardTitle>
                     </CardHeader>
-                    <CardContent className="pt-0 text-sm text-emerald-800 leading-relaxed">
-                      {isRTL ? p.descAr : p.descEn}
+                    <CardContent className="pt-0 text-sm text-[#5b1734]/90 flex-1 flex flex-col gap-3">
+                      <p>{isRTL ? track.descAr : track.descEn}</p>
+                      <ul className="space-y-1 text-[11px]">
+                        {(isRTL
+                          ? track.pointsAr
+                          : track.pointsEn
+                        ).map((pt, i) => (
+                          <li
+                            key={i}
+                            className="flex items-start gap-2"
+                          >
+                            <CheckCircle className="h-3.5 w-3.5 mt-0.5 text-[#8f1238]" />
+                            <span>{pt}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </CardContent>
                   </Card>
-                )
-              })}
-            </div>
-          </div>
-        </section>
+                ))}
 
-        {/* برامج ومسارات خاصة – مسابقات + سوبر أمة + قدسنا */}
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center mb-12">
-              <Badge className="mb-3 bg-emerald-100 text-emerald-800 border-emerald-200">
-                <Sparkles className="h-4 w-4 mx-1" />
-                <span>{isRTL ? "أكثر من مجرد دروس" : "More than just classes"}</span>
-              </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold text-emerald-900 mb-3">
-                {t.tracksTitle}
-              </h2>
-              <p className="text-lg text-emerald-800/80">{t.tracksSubtitle}</p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-3">
-              {specialTracks.map((track, idx) => (
-                <Card
-                  key={idx}
-                  className="border-emerald-100 bg-emerald-50/60 hover:bg-emerald-50 transition-colors flex flex-col"
-                >
+                {/* عمود قُدسنا مع خلفية القبة */}
+                <Card className="relative overflow-hidden border-none soft-shadow h-full flex flex-col">
+                  <div className="relative h-40">
+                    <img
+                      src="/images/Quds-zuwad.webp"
+                      alt="Al Aqsa & Quds program"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#000]/70 via-[#000]/30 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <p className="text-xs text-[#e6f9e0]">
+                        {isRTL
+                          ? "غرس حب فلسطين والقدس في قلوب أبنائنا"
+                          : "Planting love for Palestine & Al‑Quds in children’s hearts"}
+                      </p>
+                    </div>
+                  </div>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-lg text-emerald-900">
-                      {isRTL ? track.titleAr : track.titleEn}
+                    <CardTitle className="text-lg text-[#3c0020]">
+                      {isRTL
+                        ? specialTracks[2].titleAr
+                        : specialTracks[2].titleEn}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="pt-0 flex-1 flex flex-col gap-3 text-sm text-emerald-800">
-                    <p>{isRTL ? track.descAr : track.descEn}</p>
-                    <ul className="space-y-1 text-xs">
-                      {(isRTL ? track.pointsAr : track.pointsEn).map((pt, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <CheckCircle className="mt-0.5 h-3.5 w-3.5 text-emerald-700" />
+                  <CardContent className="pt-0 text-sm text-[#5b1734]/90 flex-1 flex flex-col gap-3">
+                    <p>
+                      {isRTL
+                        ? specialTracks[2].descAr
+                        : specialTracks[2].descEn}
+                    </p>
+                    <ul className="space-y-1 text-[11px]">
+                      {(isRTL
+                        ? specialTracks[2].pointsAr
+                        : specialTracks[2].pointsEn
+                      ).map((pt, i) => (
+                        <li
+                          key={i}
+                          className="flex items-start gap-2"
+                        >
+                          <CheckCircle className="h-3.5 w-3.5 mt-0.5 text-[#8f1238]" />
                           <span>{pt}</span>
                         </li>
                       ))}
                     </ul>
                   </CardContent>
                 </Card>
-              ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </AnimatedSection>
 
-        {/* قسم الفيديوهات (تم تنفيذه أعلاه) */}
-        <VideosSection language={language} />
+          {/* ====== فيديوهات ====== */}
+          <VideosSection language={language} />
 
-        {/* قسم الأسعار – شبيه بقسم التسعير في لاندينج احترافية */}
-        <section id="pricing" className="py-20 bg-emerald-50/70 scroll-mt-24">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center mb-10">
-              <Badge className="mb-3 bg-white text-emerald-800 border-emerald-200">
-                <Clock className="h-4 w-4 mx-1" />
-                <span>{isRTL ? "اختر عدد الحصص" : "Pick your weekly sessions"}</span>
-              </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold text-emerald-900 mb-3">
-                {t.pricingTitle}
-              </h2>
-              <p className="text-lg text-emerald-800/80 mb-2">{t.pricingSubtitle}</p>
-              <p className="text-xs text-emerald-700">
-                {isRTL
-                  ? `الأسعار تقريبية بناءً على عملتك الحالية (${currency.code}).`
-                  : `Prices are approximate in your local currency (${currency.code}).`}
-              </p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
-              {pricingPlans.map((plan) => (
-                <Card
-                  key={plan.key}
-                  className={`flex flex-col border-emerald-100 bg-white/90 ${
-                    plan.highlight ? "ring-2 ring-yellow-400 shadow-lg scale-[1.02]" : ""
-                  }`}
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <CardTitle className="text-xl text-emerald-900">
-                        {plan.name}
-                      </CardTitle>
-                      {plan.highlight && (
-                        <Badge className="bg-yellow-400 text-emerald-900 border-none text-xs">
-                          {t.mostPopular}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-2xl font-extrabold text-emerald-900">
-                      {formatPrice(plan.usdPrice)}
-                    </p>
-                    <p className="text-xs text-emerald-700">
-                      {plan.sessions} {t.sessionsPerMonth}
-                    </p>
-                  </CardHeader>
-                  <CardContent className="pt-0 flex-1 flex flex-col gap-3 text-xs text-emerald-800">
-                    <ul className="space-y-1">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="mt-0.5 h-3.5 w-3.5 text-emerald-700" />
-                        <span>
-                          {isRTL
-                            ? "حصص مباشرة عبر زوم مع معلمات/معلمين مختصين."
-                            : "Live Zoom sessions with qualified teachers."}
-                        </span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="mt-0.5 h-3.5 w-3.5 text-emerald-700" />
-                        <span>
-                          {isRTL
-                            ? "متابعة دورية وتقارير دورية بالمستوى."
-                            : "Regular follow‑up and progress reports."}
-                        </span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle className="mt-0.5 h-3.5 w-3.5 text-emerald-700" />
-                        <span>
-                          {isRTL
-                            ? "إمكانية تعديل عدد الحصص عند الحاجة."
-                            : "Flexibility to adjust sessions when needed."}
-                        </span>
-                      </li>
-                    </ul>
-                    <Button
-                      className="mt-3 bg-emerald-800 text-yellow-300 hover:bg-emerald-900"
-                      onClick={() => {
-                        trackWhatsAppClick()
-                        window.open(whatsappLink, "_blank")
-                      }}
-                    >
-                      <MessageCircle className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
-                      {t.subscribeNow}
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* التقييمات */}
-        <TestimonialsSection language={language} whatsappLink={whatsappLink} />
-
-        {/* قسم CTA النهائي مثل بنر قوي */}
-        <section className="py-20 bg-gradient-to-r from-emerald-900 to-emerald-800">
-          <div className="container mx-auto px-4 text-center">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                {t.ctaTitle}
-              </h2>
-              <p className="text-lg text-white/85 mb-8">{t.ctaSubtitle}</p>
-              <Button
-                size="lg"
-                className="bg-yellow-400 hover:bg-yellow-300 text-emerald-900 font-semibold shadow-lg"
-                onClick={() => {
-                  trackWhatsAppClick()
-                  window.open(whatsappLink, "_blank")
-                }}
-              >
-                <MessageCircle className={`h-5 w-5 ${isRTL ? "ml-2" : "mr-2"}`} />
-                {t.heroPrimaryCta}
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        {/* قسم تواصل معنا (Contact) */}
-        <section id="contact" className="py-16 bg-white scroll-mt-24">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-emerald-900 mb-2">
-                {t.contactTitle}
-              </h2>
-              <p className="text-emerald-800/80">{t.contactSubtitle}</p>
-            </div>
-
-            <div className="max-w-xl mx-auto grid gap-6 md:grid-cols-2">
-              <Card className="border-emerald-100 bg-emerald-50/60">
-                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <MessageCircle className="h-8 w-8 text-emerald-800" />
-                  <p className="font-semibold text-emerald-900">
-                    {isRTL ? "تواصل فوري عبر واتساب" : "Instant WhatsApp support"}
-                  </p>
-                  <p className="text-sm text-emerald-700">
+          {/* ====== الأسعار ====== */}
+          <AnimatedSection
+            id="pricing"
+            className="py-20 bg-[#fdf3f8] scroll-mt-28"
+          >
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto text-center mb-10">
+                <Badge className="mb-3 bg-white text-[#8f1238] border-[#f1c5e0]/70">
+                  <Clock className="h-4 w-4 mx-1" />
+                  <span>
                     {isRTL
-                      ? "استفسارات – حجز – مساعدة في اختيار الخطة المناسبة."
-                      : "Ask questions, book a slot or get help picking the right plan."}
+                      ? "اختر عدد الحصص الأسبوعية"
+                      : "Choose your weekly sessions"}
+                  </span>
+                </Badge>
+                <h2 className="text-3xl md:text-4xl font-extrabold text-[#3c0020] mb-3 tracking-tight">
+                  {t.pricingTitle}
+                </h2>
+                <p className="text-lg text-[#5b1734]/85 mb-2">
+                  {t.pricingSubtitle}
+                </p>
+                <p className="text-[11px] text-[#5b1734]/75">
+                  {isRTL
+                    ? `الأسعار تقريبية بعملة بلدك (${currency.code}).`
+                    : `Prices are approximate in your local currency (${currency.code}).`}
+                </p>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
+                {pricingPlans.map((plan) => (
+                  <Card
+                    key={plan.key}
+                    className={`flex flex-col bg-white/95 border-[#f1c5e0]/80 soft-shadow ${
+                      plan.highlight
+                        ? "ring-2 ring-[#f7d66e] scale-[1.02]"
+                        : ""
+                    }`}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <CardTitle className="text-lg text-[#3c0020]">
+                          {plan.name}
+                        </CardTitle>
+                        {plan.highlight && (
+                          <Badge className="bg-[#f7d66e] text-[#3c0020] border-none text-[10px]">
+                            {t.mostPopular}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-2xl font-extrabold text-[#3c0020]">
+                        {formatPrice(plan.usdPrice)}
+                      </p>
+                      <p className="text-xs text-[#5b1734]/80">
+                        {plan.sessions} {t.sessionsPerMonth}
+                      </p>
+                    </CardHeader>
+                    <CardContent className="pt-0 flex-1 flex flex-col gap-3 text-[11px] text-[#5b1734]/90">
+                      <ul className="space-y-1">
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="h-3.5 w-3.5 mt-0.5 text-[#8f1238]" />
+                          <span>
+                            {isRTL
+                              ? "حصص مباشرة عبر زوم مع معلمين ومعلمات مختصين."
+                              : "Live Zoom sessions with qualified teachers."}
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="h-3.5 w-3.5 mt-0.5 text-[#8f1238]" />
+                          <span>
+                            {isRTL
+                              ? "متابعة وتقارير دورية بالمستوى."
+                              : "Regular follow‑up and progress reports."}
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle className="h-3.5 w-3.5 mt-0.5 text-[#8f1238]" />
+                          <span>
+                            {isRTL
+                              ? "إمكانية تعديل عدد الحصص عند الحاجة."
+                              : "Flexibility to adjust sessions as needed."}
+                          </span>
+                        </li>
+                      </ul>
+                      <Button
+                        className="mt-3 bg-[#8f1238] text-[#f7d66e] hover:bg-[#a01a47] rounded-full soft-shadow-sm"
+                        onClick={() => {
+                          trackWhatsAppClick()
+                          window.open(whatsappLink, "_blank")
+                        }}
+                      >
+                        <MessageCircle
+                          className={`h-4 w-4 ${
+                            isRTL ? "ml-2" : "mr-2"
+                          }`}
+                        />
+                        {t.subscribeNow}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </AnimatedSection>
+
+          {/* ====== التقييمات ====== */}
+          <TestimonialsSection
+            language={language}
+            whatsappLink={whatsappLink}
+          />
+
+          {/* ====== قسم الدعوة النهائي ====== */}
+          <AnimatedSection className="py-20 bg-gradient-to-r from-[#8f1238] via-[#6b0023] to-[#8f1238]">
+            <div className="container mx-auto px-4">
+              <div className="grid md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] gap-10 items-center text-white">
+                <div>
+                  <h2 className="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight">
+                    {t.ctaTitle}
+                  </h2>
+                  <p className="text-base md:text-lg text-white/90 mb-6">
+                    {t.ctaSubtitle}
                   </p>
                   <Button
-                    className="mt-1 bg-emerald-800 text-yellow-300 hover:bg-emerald-900"
+                    size="lg"
+                    className="bg-[#f7d66e] text-[#3c0020] hover:bg-[#ffe086] rounded-full px-7 py-2 soft-shadow-sm hover:-translate-y-0.5 transition-transform"
                     onClick={() => {
                       trackWhatsAppClick()
                       window.open(whatsappLink, "_blank")
                     }}
                   >
-                    <MessageCircle className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
-                    {isRTL ? "ابدأ المحادثة الآن" : "Start chat now"}
+                    <MessageCircle
+                      className={`h-5 w-5 ${
+                        isRTL ? "ml-2" : "mr-2"
+                      }`}
+                    />
+                    {t.heroPrimaryCta}
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
 
-              <Card className="border-emerald-100 bg-emerald-50/40">
-                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                  <Users className="h-8 w-8 text-emerald-800" />
-                  <p className="font-semibold text-emerald-900">
-                    {isRTL ? "تابعنا على السوشيال" : "Follow us on social"}
-                  </p>
-                  <p className="text-sm text-emerald-700">
-                    {isRTL
-                      ? "شاهد مزيدًا من المقاطع والتقييمات اليومية من داخل الأكاديمية."
-                      : "See more clips, feedback and daily moments from inside the academy."}
-                  </p>
-                  <div className="flex items-center gap-4 mt-2">
-                    <a
-                      href="https://www.facebook.com/Ummah.Muslimah.academy"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="h-9 w-9 rounded-full bg-emerald-800 text-yellow-300 flex items-center justify-center hover:bg-emerald-900"
-                    >
-                      <Facebook className="h-4 w-4" />
-                    </a>
-                    <a
-                      href="https://www.instagram.com/muslim.ummah.academy/"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="h-9 w-9 rounded-full bg-emerald-800 text-yellow-300 flex items-center justify-center hover:bg-emerald-900"
-                    >
-                      <Instagram className="h-4 w-4" />
-                    </a>
+                <div className="relative">
+                  <div className="rounded-[28px] overflow-hidden soft-shadow border border-white/30 bg-white/10">
+                    <img
+                      src="/images/boy-praying.webp"
+                      alt="Boy praying in the mosque"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#3c0020]/70 via-transparent to-transparent" />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+            </div>
+          </AnimatedSection>
+
+          {/* ====== تواصل معنا ====== */}
+          <AnimatedSection
+            id="contact"
+            className="py-16 bg-white scroll-mt-28"
+          >
+            <div className="container mx-auto px-4">
+              <div className="max-w-3xl mx-auto text-center mb-8">
+                <h2 className="text-2xl md:text-3xl font-extrabold text-[#3c0020] mb-2 tracking-tight">
+                  {t.contactTitle}
+                </h2>
+                <p className="text-sm md:text-base text-[#5b1734]/85">
+                  {t.contactSubtitle}
+                </p>
+              </div>
+
+              <div className="max-w-xl mx-auto grid gap-6 md:grid-cols-2">
+                <Card className="border-[#f1c5e0]/80 bg-[#fff7fb] soft-shadow">
+                  <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                    <MessageCircle className="h-8 w-8 text-[#8f1238]" />
+                    <p className="font-semibold text-[#3c0020] text-sm">
+                      {isRTL
+                        ? "تواصل فوري عبر واتساب"
+                        : "Instant WhatsApp support"}
+                    </p>
+                    <p className="text-[11px] text-[#5b1734]/85">
+                      {isRTL
+                        ? "استفسارات – حجز – مساعدة في اختيار الخطة المناسبة."
+                        : "Ask questions, book a slot or get help choosing the right plan."}
+                    </p>
+                    <Button
+                      className="mt-1 bg-[#8f1238] text-[#f7d66e] hover:bg-[#a01a47] rounded-full px-6 soft-shadow-sm"
+                      onClick={() => {
+                        trackWhatsAppClick()
+                        window.open(whatsappLink, "_blank")
+                      }}
+                    >
+                      <MessageCircle
+                        className={`h-4 w-4 ${
+                          isRTL ? "ml-2" : "mr-2"
+                        }`}
+                      />
+                      {isRTL
+                        ? "ابدأ المحادثة الآن"
+                        : "Start chat now"}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-[#f1c5e0]/80 bg-[#fff7fb] soft-shadow">
+                  <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                    <Users className="h-8 w-8 text-[#8f1238]" />
+                    <p className="font-semibold text-[#3c0020] text-sm">
+                      {isRTL
+                        ? "تابعنا على السوشيال ميديا"
+                        : "Follow us on social media"}
+                    </p>
+                    <p className="text-[11px] text-[#5b1734]/85">
+                      {isRTL
+                        ? "شاهد لقطات من الحصص والتقييمات اليومية."
+                        : "See clips from sessions and daily feedback."}
+                    </p>
+                    <div className="flex items-center gap-4 mt-2">
+                      <a
+                        href="https://www.facebook.com/Ummah.Muslimah.academy"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="icon-bubble h-9 w-9 rounded-full bg-[#8f1238] flex items-center justify-center text-[#f7d66e]"
+                      >
+                        <Facebook className="h-4 w-4" />
+                      </a>
+                      <a
+                        href="https://www.instagram.com/muslim.ummah.academy/"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="icon-bubble h-9 w-9 rounded-full bg-[#8f1238] flex items-center justify-center text-[#f7d66e]"
+                      >
+                        <Instagram className="h-4 w-4" />
+                      </a>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </AnimatedSection>
+        </main>
+
+        {/* ====== الفوتر ====== */}
+        <footer className="border-t border-[#f1c5e0]/80 bg-[#3c0020] text-white py-4">
+          <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-[11px]">
+            <p>{t.footerRights}</p>
+            <div className="flex items-center gap-3 text-white/70">
+              <span>
+                {isRTL ? "سياسة الخصوصية" : "Privacy policy"}
+              </span>
+              <span>•</span>
+              <span>
+                {isRTL ? "شروط الاستخدام" : "Terms of use"}
+              </span>
             </div>
           </div>
-        </section>
-      </main>
+        </footer>
+      </div>
 
-      {/* فوتر */}
-      <footer className="border-t border-emerald-100 bg-emerald-900 text-white py-4">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-xs md:text-sm">
-          <p>{t.footerRights}</p>
-          <div className="flex items-center gap-4 text-emerald-100/80">
-            <span>{isRTL ? "سياسة الخصوصية" : "Privacy policy"}</span>
-            <span>•</span>
-            <span>{isRTL ? "شروط الاستخدام" : "Terms of use"}</span>
-          </div>
-        </div>
-      </footer>
-    </div>
+      {/* ====== ستايل عام للخطوط والأنيميشن (مثل زواد) ====== */}
+      <style jsx global>{`
+        @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap");
+
+        html[dir="rtl"],
+        html[dir="rtl"] body {
+          font-family: "Cairo", system-ui, -apple-system, BlinkMacSystemFont,
+            "Segoe UI", sans-serif;
+        }
+
+        html[dir="ltr"],
+        html[dir="ltr"] body {
+          font-family: "Nunito", system-ui, -apple-system, BlinkMacSystemFont,
+            "Segoe UI", sans-serif;
+        }
+
+        .soft-shadow-sm {
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+        }
+
+        .soft-shadow {
+          box-shadow: 0 18px 45px rgba(0, 0, 0, 0.09);
+        }
+
+        .header-blur {
+          backdrop-filter: blur(14px);
+          background-image: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.06),
+            rgba(255, 255, 255, 0.14)
+          );
+        }
+
+        .hero-float {
+          animation: heroFloat 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes heroFloat {
+          0% {
+            transform: translateY(0px);
+          }
+          100% {
+            transform: translateY(-10px);
+          }
+        }
+
+        .section-fade {
+          opacity: 0;
+          transform: translateY(40px);
+          transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+        }
+
+        .section-fade-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .icon-bubble {
+          transition: transform 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        .icon-bubble:hover {
+          transform: translateY(-6px) scale(1.05);
+          box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
+        }
+
+        .slider-arrow,
+        .video-nav-btn {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(255, 255, 255, 0.98);
+          border-radius: 999px;
+          border: 1px solid rgba(191, 128, 164, 0.5);
+          padding: 0.55rem 0.75rem;
+          font-size: 0.9rem;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+          cursor: pointer;
+          transition: transform 0.2s ease, box-shadow 0.2s ease,
+            background 0.2s ease;
+        }
+
+        .slider-arrow:hover,
+        .video-nav-btn:hover {
+          transform: translateY(-50%) translateY(-2px);
+          background: #fff7fb;
+          box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+        }
+
+        .video-nav-btn {
+          top: 50%;
+        }
+      `}</style>
+    </>
   )
 }
